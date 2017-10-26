@@ -1,0 +1,113 @@
+@import "compass/css3";
+
+@import "compass/css3";
+@import url(https://fonts.googleapis.com/css?family=Patua+One|Open+Sans);
+
+* { 
+  -moz-box-sizing: border-box; 
+  -webkit-box-sizing: border-box; 
+	box-sizing: border-box; 
+}
+
+body {
+  background:black;
+}
+
+table {
+  border-collapse: separate;
+  overflow-x: auto;
+  border: 1px black;
+  background:black;
+  margin:5px auto;
+  align: left;
+}
+
+thead th {
+  font-family: 'Patua One', cursive;
+  font-size:13px;
+  font-weight:400;
+  color:gold;
+  text-align:center;
+  padding:1px;
+  border: 1px white;
+}
+
+tbody tr {
+  font-family: 'Open Sans', sans-serif;
+  font-weight:400;
+  background:DimGray;
+  font-size:13px;
+  padding:5px 5px 5px 5px; 
+}
+
+
+
+tbody tr:nth-child(even) {
+  background:DarkSlateGray;
+  color:snow;
+}
+
+a.tablea {
+  color:gold;
+}
+
+table.menu {
+  border-collapse: separate;
+  background: black;
+  @include border-radius(5px);
+  margin:2px auto;
+  @include box-shadow(0px 0px 5px rgba(0,0,0,0.3));
+}
+
+.menu {
+  font-family: 'Open Sans', sans-serif;
+  font-weight:400;
+  color:yellow;
+  font-size:13px;
+  background:black;
+  padding:1px 1px 1px 1px;
+  border-bottom:0px solid #e0e0e0;
+}
+
+.mainbody {
+  font-family: 'Open Sans', sans-serif;
+  font-weight:400;
+  color:white;
+  font-size:13px;
+  background:black;
+  padding:1px 1px 1px 1px;
+}
+
+a {
+  font-family: 'Open Sans', sans-serif;
+  font-weight:400;
+  color:red;
+}
+
+h2 {
+  font-family: 'Open Sans', sans-serif;
+  font-weight:400;
+  color:GoldenRod;
+  text-align:left;
+}
+
+table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after { 
+    content: " \25B4\25BE" 
+}
+
+table.sortable tbody {
+    counter-reset: sortabletablescope;
+	overflow-x:auto;
+}
+table.sortable thead tr::before {
+    content: "";
+    display: table-cell;
+}
+table.sortable tbody tr::before {
+    content: counter(sortabletablescope);
+    counter-increment: sortabletablescope;
+    display: table-cell;
+}
+
+th span.tooltip {display:none;}
+th:hover span.tooltip {position:absolute;top:150px;left:400px;display:inline;border:2px solid green;}
