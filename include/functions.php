@@ -39,10 +39,38 @@ function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 	$country = substr($country1,34,2);
 	$dnes=date("Y-m-d");
 	if ($htpperror<>200) {
+			if ($htpperror==404) {
+	     	$sql="SELECT chess_com_player_id as pid FROM players WHERE name='$playername'";
+		     $result = $link->query($sql);
+		     $row = $result->fetch_assoc();
+	     	$pid=strtolower($row['pid']);
+		     $sql="SELECT name as newname FROM players 
+		         WHERE name<>'$playername'
+		         AND chess_com_player_id=$pid";
+		     $result = $link->query($sql);
+		     $row = $result->fetch_assoc();
+	     	$newname=strtolower($row['newname']);
+		     if ($newname<>'') {
+					     $sql="DELETE FROM players
+		         WHERE name='$playername'";
+		          $result = $link->query($sql);
+		         $sql="UPDATE players 
+		  		     SET name='$newname'
+					     WHERE chess_com_player_id=$pid";
+			    }
+		    echo $sql.'<BR>';
+		$result = $link->query($sql);
+		$url = $url." - player renamed";
+		$sql="INSERT INTO api_errors (url,error)
+		  VALUES('$url',$htpperror)";
+		  echo $sql.'<BR>';
+		  $result = $link->query($sql);
+		} else {
 		  $sql="INSERT INTO api_errors (url,error)
 		  VALUES('$url',$htpperror)";
 		//echo $sql.'<BR>';
 		$result = $link->query($sql);
+		}
 	} else {
 			$sql="UPDATE players 
 		  		SET last_login='$last_online', member_from='$member_from', 
