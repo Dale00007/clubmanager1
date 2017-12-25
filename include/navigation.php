@@ -24,7 +24,7 @@ if (!empty($_SESSION['username'])){
 		<A href="index.php" class="menu">HOME</A><BR><BR>
 		<A href="players_list.php" class="menu">PLAYERS</A><BR><BR>
 		<A href="matches.php" class="menu">MATCHES</A><BR><BR>
-		<A href="recruitment.php" class="menu">RECRUITMENT</A><BR><BR>
+		<A href="recruitment_invite.php?invite_type=elo" class="menu">RECRUITMENT</A><BR><BR>
 		<A href="statistics.php" class="menu">STATISTICS</A>
  
 <?php

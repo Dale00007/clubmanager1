@@ -74,7 +74,7 @@ echo "<form action='index.php' method='get'><select name='team'>";
 		</h3>	
     <p><a href="logout.php">Sign Out of Your Account</a></p>
 <TABLE align="left"><TR><TD>
-<h2>New players in your club</h2>
+<h2>New players in your club in last 7 days</h2>
     <div align="left" class="container">
     <TABLE align="left" class="sortable">
      <THEAD>
@@ -147,7 +147,7 @@ while ($row = $result->fetch_assoc()) {
 </TABLE>	
 </TD></TR>
 <TR><TD>	
-<h2>Players who left your club</h2>
+<h2>Players who left your club in last 7 days</h2>
     <div align="left" class="container">
     <TABLE align="left" class="sortable">
      <THEAD>

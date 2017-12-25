@@ -10,6 +10,12 @@ if (strpos($_SERVER['PHP_SELF'],'players') !== false) {
 	    <A href='players_left.php' class='menu'>LEFT</A>";
 		}
 		
+if (strpos($_SERVER['PHP_SELF'],'recruitment') !== false) {
+	echo "<A href='recruitment_list.php' class='menu'>FULL LIST</A> - 
+		INVITES (<A href='recruitment_invite.php?invite_type=current_games' class='menu'>GAMES</A>, 
+		<A href='recruitment_invite.php?invite_type=elo' class='menu'>ELO</A>)";
+		}
+
 if (strpos($_SERVER['PHP_SELF'],'administration') !== false) {
 	echo "<A href='administration_users.php' class='menu'>USERS</A> - 
 		<A href='administration_teams.php' class='menu'>TEAMS</A> -
