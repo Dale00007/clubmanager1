@@ -23,6 +23,7 @@ $headers = array(
 // findClubCandidatesCountry($teamid,$ctry) - Add players to candidate list for teams using country template
 // findClubMatches(teamName, teamId, findType) - Find new club matches. FindType can equal - finished, in_progress, registered, all)
 // findClubsMatches() - Find new club matches for all teams.
+// searchWords(string, array) - Finds if any of strings in array is included in the string
 
 
 // Update single player profile
@@ -744,7 +745,7 @@ function findClubMatches($name,$teamsid,$findType) {
      echo "$matchId - $matchName - $matchLink - $matchOpponent - $matchOpponentLink";
      if (in_array($matchId, $existingClubGames))
        {
-         echo " - Existing club match<BR>";
+//         echo " - Existing club match<BR>";
        }
      else
        {
@@ -773,7 +774,7 @@ function findClubMatches($name,$teamsid,$findType) {
              VALUES($matchId,$teamsid,'$matchOpponent',$matchStatus,$competition,'$matchName')";
          $result = $link->query($sql);
          $found_matches++;
-         echo " - New match - ADDED - New count: $found_matches - Found word: $foundWord - Found competition: $competition<BR>";
+//         echo " - New match - ADDED - New count: $found_matches - Found word: $foundWord - Found competition: $competition<BR>";
        }
      }
    }
@@ -813,6 +814,74 @@ function searchWords($string,$words) {
         }
     }
     return false;
+}
+
+function updateMatch($matchid,$teamid,$teamlink) {
+  global $link;
+  $url="https://api.chess.com/pub/match/$matchid";
+	$url = strtolower($url);
+ 	$json1=getJson($url);
+ 	$json=$json1[0];
+	$htpperror=$json1[1];
+	$obj = json_decode($json);
+	if ($htpperror<>200) {
+		  $sql="INSERT INTO api_errors (url,error)
+		  VALUES('$url',$htpperror)";
+		//echo $sql.'<BR>';
+		$result = $link->query($sql);
+	} else {
+  echo $url."<BR>";
+  $status = $obj->status;
+  $teams = $obj->teams;
+  $team1 = $teams->team1;
+  $team1LinkLong = $team1->{'@id'};
+  $team1Link = substr($team1LinkLong,31,strlen($team1LinkLong)-31);
+  $team2 = $teams->team2;
+  $team2LinkLong = $team2->{'@id'};
+  $team2Link = substr($team2LinkLong,31,strlen($team2LinkLong)-31);
+
+  //get players count
+  $players1 = $team1->players;
+  $players2 = $team2->players;
+  //get rating average
+  $currentBoards = min($players1,$players2);
+  $rr1=$players1->rating;
+  $rr2=$players2->rating;
+  $rr1=(array)$rr1;
+  $rr2=(array)$rr2;
+  $r1=rsort($rr1);
+  $r2=rsort($rr2);
+  print_r($r1); echo "<BR>"; print_r($r2);
+
+  if ($team1Link==$teamlink) {
+    $homeaway="home";
+    $plh=count($players1);
+    $pla=count($players2);
+  } else {
+    $homeaway="away";
+    $pla=count($players1);
+    $plh=count($players2);
+  }
+
+  switch ($status) {
+    case 'registration':
+      $matchStatus=0;
+      break;
+    case 'in_progress':
+      $matchStatus=1;
+      break;
+    case 'finished':
+      $matchStatus=2;
+      break;
+    }
+
+    $sql="UPDATE matches
+      SET status=$matchStatus,players=$plh,players_o=$pla
+      WHERE matchid=$matchid
+       AND teams_id=$teamid";
+    echo $sql;
+    $result = $link->query($sql);
+  }
 }
 
 ?>
