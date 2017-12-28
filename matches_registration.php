@@ -39,6 +39,9 @@ findClubMatches($team_link,$team_id,$findType);
    <TH>Opponent</TH>
    <TH>Players<SPAN class="tooltip">Number of registered players</SPAN></TH>
    <TH>Average<SPAN class="tooltip">Average rating of players</SPAN></TH>
+   <TH>BasEst<SPAN class="tooltip">Estimated result based on direct comparison of ratings on boards</SPAN></TH>
+   <TH>AdvEst<SPAN class="tooltip">Estimated result based on advanced comparison of ratings on the boards</SPAN></TH>
+   <TH>Details<SPAN class="tooltip">Displays page with detailed match information for recruitment</SPAN></TH>
  </TR>
  </THEAD>
 
@@ -51,7 +54,7 @@ findClubMatches($team_link,$team_id,$findType);
  $result = $link->query($sql);
  while ($row = $result->fetch_assoc()) {
      $matchId=$row['matchid'];
-     updateMatch($matchId,$team_id,$team_link);
+     updateMatchReg($matchId,$team_id,$team_link);
  }
 
  $sql = "SELECT *
@@ -68,13 +71,20 @@ findClubMatches($team_link,$team_id,$findType);
   $playersOpp=$row['players_o'];
   $avgRat=$row['avgrat'];
   $avgRatOpp=$row['avgrat_o'];
+  $basEst=$row['basest'];
+  $basEstOpp=$row['basest_o'];
+  $advEst=$row['advest'];
+  $advEstOpp=$row['advest_o'];
 
   echo "<TR>
-   <TD><A href='https://www.chess.com/club/matches/$matchId' target='_blank' class='tablea'>$matchId</TD>
-   <TD align='center'>$matchName</TD>
-   <TD align='center'>$opponentLink</TD>
+   <TD align='center'><A href='https://www.chess.com/club/matches/$matchId' target='_blank' class='tablea'>$matchId</TD>
+   <TD align='left'>$matchName</TD>
+   <TD align='left'>$opponentLink</TD>
    <TD align='center'>$players : $playersOpp</TD>
    <TD align='center'>$avgRat : $avgRatOpp</TD>
+   <TD align='center'>$basEst : $basEstOpp</TD>
+   <TD align='center'>$advEst : $advEstOpp</TD>
+   <TD align='center'><A href='matches_registration_match.php?$matchId' class='tablea'>ENTER</A></TD>
    </TR>";
  }
   ?>

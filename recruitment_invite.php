@@ -44,7 +44,7 @@ if ($markall == "yes") {
   			AND teams_id=$team_id
   			AND NOT block
         AND last_invite<'$retryday'
-  		ORDER BY current_games DESC, elo_s DESC, name
+  		ORDER BY current_games DESC, elo_s DESC, elo_blitz DESC, elo_rapid DESC, name
   		LIMIT 30";
           break;
       case "elo":
@@ -54,7 +54,7 @@ if ($markall == "yes") {
   			AND teams_id=$team_id
   			AND NOT block
         AND last_invite<'$retryday'
-  		ORDER BY elo_s DESC, current_games DESC, name
+  		ORDER BY elo_s DESC, current_games DESC, elo_blitz DESC, elo_rapid DESC, name
   		LIMIT 30";
           break;
   }
@@ -102,7 +102,7 @@ switch ($invite_type) {
 			AND teams_id=$team_id
 			AND NOT block
       AND last_invite<'$retryday'
-		ORDER BY current_games DESC, elo_s DESC
+		ORDER BY current_games DESC, elo_s DESC, elo_blitz DESC, elo_rapid DESC, name
 		LIMIT 30";
         break;
     case "elo":
@@ -112,7 +112,7 @@ switch ($invite_type) {
 			AND teams_id=$team_id
 			AND NOT block
       AND last_invite<'$retryday'
-		ORDER BY elo_s DESC
+		ORDER BY elo_s DESC, current_games DESC, elo_blitz DESC, elo_rapid DESC, name
 		LIMIT 30";
         break;
 }
@@ -175,7 +175,7 @@ switch ($invite_type) {
 			AND teams_id=$team_id
 			AND NOT block
       AND last_invite<'$retryday'
-		ORDER BY current_games DESC, elo_s DESC
+		ORDER BY current_games DESC, elo_s DESC, elo_blitz DESC, elo_rapid DESC, name
 		LIMIT 30";
         break;
     case "elo":
@@ -185,7 +185,7 @@ switch ($invite_type) {
 			AND teams_id=$team_id
 			AND NOT block
       AND last_invite<'$retryday'
-		ORDER BY elo_s DESC
+		ORDER BY elo_s DESC, current_games DESC, elo_blitz DESC, elo_rapid DESC, name
 		LIMIT 30";
         break;
 }
