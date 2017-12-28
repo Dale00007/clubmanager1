@@ -482,7 +482,7 @@ function updateCandidateMatches($playername) {
 		$result = $link->query($sql);
 		} else {
 			$obj = json_decode($json);
-			$cg = count($obj->games)/2;
+			$cg = count($obj->games);
 			$sql="UPDATE candidates
 		  		SET current_games=$cg
 				WHERE name='$playername'";
@@ -762,7 +762,7 @@ function findClubMatches($name,$teamsid,$findType) {
        {
 //         echo " - Existing club match<BR>";
        }
-     else
+     else$result = $link->query($sql);
        {
          //find game status
          switch ($gs) {

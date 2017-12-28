@@ -84,7 +84,7 @@ findClubMatches($team_link,$team_id,$findType);
    <TD align='center'>$avgRat : $avgRatOpp</TD>
    <TD align='center'>$basEst : $basEstOpp</TD>
    <TD align='center'>$advEst : $advEstOpp</TD>
-   <TD align='center'><A href='matches_registration_match.php?$matchId' class='tablea'>ENTER</A></TD>
+   <TD align='center'><A href='matches_registration_match.php?matchid=$matchId' class='tablea'>ENTER</A></TD>
    </TR>";
  }
   ?>
