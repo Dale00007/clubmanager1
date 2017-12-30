@@ -10,6 +10,7 @@ if(!isset($_SESSION['username']) || empty($_SESSION['username'])){
 
 // Include config file
 require_once 'include/config.php';
+require_once 'include/functions.php';
 
 // Change default team
 if (!empty($_GET['team'])){$team = $_GET['team'];}
@@ -41,10 +42,11 @@ include "include/navigation.php";
 
 <?php
   $user=$_SESSION['username'];
-  $sql = "SELECT teamname FROM users,teams,users_teams WHERE users.username='$user' AND users.id=users_teams.users_id AND teams.id=users_teams.teams_id and users_teams.def=1";
+  $sql = "SELECT teamname,teamlink FROM users,teams,users_teams WHERE users.username='$user' AND users.id=users_teams.users_id AND teams.id=users_teams.teams_id and users_teams.def=1";
   $result = $link->query($sql);
   $row = $result->fetch_assoc();
 		$teamname=$row['teamname'];
+    $teamLink=$row['teamlink'];
   echo $teamname;
 ?>
 </h3>
@@ -89,7 +91,24 @@ AND last_invite<'$retryday'";
 
 $result = $link->query($sql);
 $availableCandidates = mysqli_num_rows($result);
-echo "<TR><TD><H2>Available candidates: <A href='recruitment_invite.php?invite_type=elo'>$availableCandidates</A></H2></TD></TR>";
+echo "<TR><TD><H2>Available candidates: <A href='recruitment_invite.php?invite_type=elo' class='tablea'>$availableCandidates</A></H2></TD></TR>";
+
+$url="https://api.chess.com/pub/club/$teamLink/matches";
+$url = strtolower($url);
+$json1=getJson($url);
+$json=$json1[0];
+$htpperror=$json1[1];
+$obj = json_decode($json);
+if ($htpperror<>200) {
+    $sql="INSERT INTO api_errors (url,error)
+    VALUES('$url',$htpperror)";
+  //echo $sql.'<BR>';
+  $result = $link->query($sql);
+} else {
+$registered = $obj->registered;
+$rm = count($registered);
+echo "<TR><TD><H2>Matches in registration: <A href='matches_registration.php' class='tablea'>$rm</A></H2></TD></TR>";
+}
 ?>
 <TR><TD>
 <h2>New players in your club in last 7 days</h2>
@@ -243,4 +262,3 @@ include "include/navigationend.php";
 ?>
 </body>
 </html>
- 

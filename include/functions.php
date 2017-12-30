@@ -733,6 +733,7 @@ function findClubMatches($name,$teamsid,$findType) {
     $result = $link->query($sql);
     $existingClubGames1 = $result->fetch_all(MYSQLI_ASSOC);
     $existingClubGames = array_column($existingClubGames1, 'matchid');
+    //print_r($existingClubGames); echo "<BR>";
 
   $sql="SELECT abbr,id FROM gametype_seasons";
       $result = $link->query($sql);
@@ -758,12 +759,11 @@ function findClubMatches($name,$teamsid,$findType) {
      $matchOpponent = substr($matchOpponentLink,31,strlen($matchOpponentLink)-31);
 
 //     echo "$matchId - $matchName - $matchLink - $matchOpponent - $matchOpponentLink";
+     //echo "MatchID under process: $matchId<BR>";
      if (in_array($matchId, $existingClubGames))
        {
-//         echo " - Existing club match<BR>";
-       }
-     else$result = $link->query($sql);
-       {
+         //echo "Existing club match<BR>";
+       } else {
          //find game status
          switch ($gs) {
            case 'registered':
@@ -789,7 +789,7 @@ function findClubMatches($name,$teamsid,$findType) {
              VALUES($matchId,$teamsid,'$matchOpponent',$matchStatus,$competition,'$matchName')";
          $result = $link->query($sql);
          $found_matches++;
-//         echo " - New match - ADDED - New count: $found_matches - Found word: $foundWord - Found competition: $competition<BR>";
+         // echo " - New match - ADDED - New count: $found_matches - Found word: $foundWord - Found competition: $competition<BR>";
        }
      }
    }
@@ -870,21 +870,19 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
       $players2 = $team2->players;
       $plcnt1=count($players1);
       $plcnt2=count($players2);
-      $currentBoards = min($plcnt1,$plcnt2);
-      //echo "$plcnt1:$plcnt2 - $currentBoards<BR>";
 
   //get rating average
   for ($i=0;$i<$plcnt1;$i++) {
-    $plrat1[$i]=$players1[$i]->rating;
+    if (empty($players1[$i]->rating)){$plrat1[$i]=""; $plcnt1=$plcnt1-1;} else {$plrat1[$i]=$players1[$i]->rating;}
     // echo $plrat1[$i].",";
   }
 
   for ($i=0;$i<$plcnt2;$i++) {
-    $plrat2[$i]=$players2[$i]->rating;
+    if (empty($players2[$i]->rating)){$plrat1[$i]=""; $plcnt2=$plcnt2-1;} else {$plrat2[$i]=$players2[$i]->rating;}
     // echo $plrat2[$i].",";
   }
   rsort($plrat1);rsort($plrat2);
-
+  $currentBoards = min($plcnt1,$plcnt2);
   $sumRat1=0;$sumRat2=0;$basEst1=0;$basEst2=0;$bf50=0;$ba50=0;
   for ($i=0;$i<$currentBoards;$i++) {
     $sumRat1=$sumRat1+$plrat1[$i];
