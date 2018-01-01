@@ -8,21 +8,43 @@ if(!isset($_SESSION['username']) || empty($_SESSION['username'])){
 }
 // Include config file
 require_once 'include/config.php';
+require_once "include/functions.php";
 include "include/header.php";
 ?>
 
 <?php
-echo "<body>";
-include "include/navigation.php";
-include "include/functions.php";
-$team_id=$_SESSION['team_id'];
+//Get page parms
+function notempty($var) {
+    return ($var==="0"||$var);
+}
+
+if (empty($_GET['eloMax'])) {$eloMax=3000;} else {$eloMax=$_GET['eloMax'];}
+if (empty($_GET['eloMin'])) {$eloMin=0;} else {$eloMin=$_GET['eloMin'];}
+if (notempty($_GET['currentGamesMax'])) {$currentGamesMax=$_GET['currentGamesMax'];} else {$currentGamesMax=999;}
+if (notempty($_GET['timeoutMax'])) {$timeoutMax=$_GET['timeoutMax'];} else {$timeoutMax=100;}
+if (empty($_GET['currentGamesMin'])) {$currentGamesMin=0;} else {$currentGamesMin=$_GET['currentGamesMin'];}
+if (empty($_GET['lastLogin'])) {$lastLoginP=""; $lastLoginDay="";
+  } else {
+  $lastLoginP=$_GET['lastLogin'];
+  $x="-$lastLoginP Days";
+  $lastLoginDay=date("y-m-d",strtotime($x));
+  //$lastLoginDay=strtotime($lastLoginDay);
+  //echo "lastLogin: $lastLogin, x: $x, lastLoginDay: $lastLoginDay";
+  }
 $matchId=$_GET['matchid'];
+$team_id=$_SESSION['team_id'];
+
+//Get teamlink based on session and update match details from Chess.com
 $sql = "SELECT teamlink FROM teams WHERE id=$team_id";
 $result = $link->query($sql);
 $row = $result->fetch_assoc();
 $teamLink=$row['teamlink'];
 updateMatchReg($matchId,$team_id,$teamLink);
+
+echo "<body>";
+include "include/navigation.php";
 ?>
+
 <P>
 <h2>Match details - Registration phase</h2>
 
@@ -42,6 +64,11 @@ $result = $link->query($sql);
  $basEstOpp=$row['basest_o'];
  $advEst=$row['advest'];
  $advEstOpp=$row['advest_o'];
+ $rules=$row['rules'];
+ $timeClass=$row['time_class'];
+ if ($timeClass=="D") {$timeClass="Daily";} else {$timeClass="Live";}
+ if ($rules=="S") {$rules="Standard"; $eloSort="elo_s";} else {$rules="Chess960"; $eloSort="elo_960";}
+
 echo "<div align='left' class='container'>
 <h3>Match Summary</h3>
 <TABLE align='left'>
@@ -49,6 +76,8 @@ echo "<div align='left' class='container'>
  <TR><TH>Match API</TH><TD><A HREF='https://api.chess.com/pub/match/$matchId' target='_blank' class='tablea'>https://api.chess.com/pub/match/$matchId</A></TD></TR>
  <TR><TH>Match Name</TH><TD>$matchName</TD></TR>
  <TR><TH>Opponent</TH><TD>$opponentLink</TD></TR>
+ <TR><TH>Rules</TH><TD>$rules</TD></TR>
+ <TR><TH>Time class</TH><TD>$timeClass</TD></TR>
  <TR><TH>Players</TH><TD align='center'>$players : $playersOpp</TD></TR>
  <TR><TH>Average</TH><TD align='center'>$avgRat : $avgRatOpp</TD></TR>
  <TR><TH>Basic Estimate</TH><TD align='center'>$basEst : $basEstOpp</TD></TR>
@@ -177,12 +206,48 @@ if ($htpperror<>200) {
 <br clear='all' /><br />
 
 <h3>Candidate players</h3>
+<form action='matches_registration_match.php' method='get'>
+
+<?php
+echo "<INPUT type='hidden' name='matchid' value=$matchId>
+<TABLE align='left'>
+  <THEAD>
+  <TR><TH colspan=3>Filtering criteria</TH></TR>
+  </THEAD>
+  <TR><TD>ELO</TD>
+      <TD align='center'><INPUT type='text' name='eloMin' value='$eloMin' size=4></TD>
+      <TD align='center'><INPUT type='text' name='eloMax' value='$eloMax' size=4></TD>
+  </TR>
+  <TR><TD>Last login not older than</TD><TD colspan=2 align='center'><SELECT name='lastLogin'>
+      <OPTION value=''"; if ($lastLoginP == "") {echo " SELECTED";}; echo ">Not used</OPTION>
+      <OPTION value='3'"; if ($lastLoginP == "3") {echo " SELECTED";}; echo ">3 days</OPTION>
+      <OPTION value='7'"; if ($lastLoginP == "7") {echo " SELECTED";}; echo ">7 days</OPTION>
+      <OPTION value='14'"; if ($lastLoginP == "14") {echo " SELECTED";}; echo ">14 days</OPTION>
+      <OPTION value='30'"; if ($lastLoginP == "30") {echo " SELECTED";}; echo ">30 days</OPTION></SELECT>
+      </TD></TR>
+  <TR><TD>Max timeout</TD><TD colspan=2 align='center'><INPUT type='text' name='timeoutMax' value='$timeoutMax' size=4></TD></TR>
+  <TR><TD>Current games</TD>
+      <TD align='center'><INPUT type='text' name='currentGamesMin' value='$currentGamesMin' size=4></TD>
+      <TD align='center'><INPUT type='text' name='currentGamesMax' value='$currentGamesMax' size=4></TD></TR>
+  <TR><TD>Max games</TD><TD colspan=2>respect player level parameter</TD></TR>
+  <TR><TD>Chess960</TD><TD colspan=2>respect player level parameter</TD></TR>
+  <TR><TD>Only slow games</TD><TD colspan=2>respect player level parameter</TD></TR>
+  ";
+?>
+  <THEAD>
+  <TR><TH colspan=3><INPUT type='submit' value='FILTER'></TH></TR>
+  </THEAD>
+</TABLE>
+</FORM>
+<br clear='all' /><br />
+
 <div align="left" class="container">
 <TABLE align="left" class="sortable">
  <THEAD>
  <TR>
  <TH>Playername</TH>
  <TH>Rating</TH>
+ <TH>Rat960</TH>
  <TH>TO<SPAN class="tooltip">Percentage of timeouts in last 3months based on Chess.com</SPAN></TH>
  <TH>Last login<SPAN class="tooltip">Last login to CHess.com</SPAN></TH>
  <TH>CG<SPAN class="tooltip">Number of online games player is having now</SPAN></TH>
@@ -203,11 +268,20 @@ if ($htpperror<>200) {
        AND players_status_id=1
        AND not left_team
        AND not block
-       ORDER BY elo_s DESC";
+       AND $eloSort>=$eloMin
+       AND $eloSort<=$eloMax
+       AND to_ratio_site<=$timeoutMax
+       AND current_games>=$currentGamesMin
+       AND current_games<=$currentGamesMax ";
+       if (!empty($lastLoginDay)) {$sql=$sql."AND last_login>'$lastLoginDay' ";}
+ $sql=$sql."ORDER BY $eloSort DESC";
+ //echo "$sql<BR>";
  $result = $link->query($sql);
+$i=0;
 while ($row = $result->fetch_assoc()) {
    $pName=$row['username'];
    $pRating=$row['elo_s'];
+   $pRating960=$row['elo_960'];
    $pTimeout=$row['to_ratio_site'];
    $pLastLogin=$row['last_login'];
    $pCurrentGames=$row['current_games'];
@@ -220,6 +294,7 @@ while ($row = $result->fetch_assoc()) {
      echo "<TR>
       <TD><A HREF='https://www.chess.com/member/$pName' target='_blank' class='tablea'>$pName</A></TD>
       <TD align='center'>$pRating</TD>
+      <TD align='center'>$pRating960</TD>
       <TD align='center'>$pTimeout</TD>
       <TD align='center'>$pLastLogin</TD>
       <TD align='center'>$pCurrentGames</TD>
@@ -227,13 +302,18 @@ while ($row = $result->fetch_assoc()) {
       <TD align='center'>$pp960</TD>
       <TD align='center'>$ppSlow</TD>
       <TD>$ppComment</TD>
-      <TD><A HREF='players_player_detail.php' class='tablea'>ENTER</A></TD>
+      <TD align='center'><A HREF='players_player_detail.php' class='tablea'>ENTER</A></TD>
       </TR>";
+      $availableCandidates[$i]=$pName;
+      $i++;
       }
     }
+    echo "</TABLE><br clear='all' /><br /><HR>";
+    foreach ($availableCandidates as $key => $value) {
+      echo "$value<br>";
+      }
  ?>
 
-</TABLE>
 <?php
 include "include/navigationend.php";
 ?>

@@ -154,8 +154,10 @@ function updatePlayerStats($playername) {
 		} else {
 			$obj = json_decode($json);
 			$chess_daily = $obj->chess_daily;
-			$chess_daily_last = $chess_daily->last;
-			$chess_daily_rating = $chess_daily_last->rating;
+      $chess_daily_last = $chess_daily->last;
+      $chess_daily_record = $chess_daily->record;
+      $chess_daily_rating = $chess_daily_last->rating;
+      $chess_daily_timeout = $chess_daily_record->timetout_percent;
 			$chess_960 = $obj->chess960_daily;
 			$chess_960_last = $chess_960->last;
 			$chess_960_rating = $chess_960_last->rating;
@@ -171,7 +173,7 @@ function updatePlayerStats($playername) {
 			if ($chess_blitz_rating=='') {$chess_blitz_rating=0;}
 			$sql="UPDATE players
 				SET elo_s=$chess_daily_rating, elo_960=$chess_960_rating,
-				elo_rapid=$chess_rapid_rating, elo_blitz=$chess_blitz_rating
+				elo_rapid=$chess_rapid_rating, elo_blitz=$chess_blitz_rating, to_ratio_site=$chess_daily_timeout
 				WHERE username='$playername'";
 			echo $sql.'<HR>';
 			$result = $link->query($sql);
@@ -847,6 +849,8 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
 	} else {
 //  echo "<HR>".$url."<BR>";
   $status = $obj->status;
+  $rules = $obj->rules;
+  $time_class = $obj->time_class;
   $teams = $obj->teams;
   $team1 = $teams->team1;
   $team1LinkLong = $team1->{'@id'};
@@ -854,8 +858,6 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
   $team2 = $teams->team2;
   $team2LinkLong = $team2->{'@id'};
   $team2Link = substr($team2LinkLong,31,strlen($team2LinkLong)-31);
-
-
 
   if ($status=="in_progress") {
     $sql="UPDATE matches
@@ -865,11 +867,15 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
     $result = $link->query($sql);
     } else {
 
-      //get players count
-      $players1 = $team1->players;
-      $players2 = $team2->players;
-      $plcnt1=count($players1);
-      $plcnt2=count($players2);
+    //get players count
+    $players1 = $team1->players;
+    $players2 = $team2->players;
+    $plcnt1=count($players1);
+    $plcnt2=count($players2);
+
+    //get match info
+    if ($time_class=="daily") {$timeClass="D";} else {$timeClass="L";}
+    if ($rules=="chess") {$rules="S";} else {$rules="9";}
 
   //get rating average
   for ($i=0;$i<$plcnt1;$i++) {
@@ -920,9 +926,11 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
       SET players=$plh,players_o=$pla,
           avgrat=$avh, avgrat_o=$ava,
           basest=$beh, basest_o=$bea,
-          advest=$aeh, advest_o=$aea
+          advest=$aeh, advest_o=$aea,
+          rules='$rules', time_class='$timeClass'
       WHERE matchid=$matchid
        AND teams_id=$teamid";
+       //echo "$sql<BR>";
     $result = $link->query($sql);
    }
   }
