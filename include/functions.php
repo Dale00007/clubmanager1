@@ -157,7 +157,7 @@ function updatePlayerStats($playername) {
       $chess_daily_last = $chess_daily->last;
       $chess_daily_record = $chess_daily->record;
       $chess_daily_rating = $chess_daily_last->rating;
-      $chess_daily_timeout = $chess_daily_record->timetout_percent;
+      $chess_daily_timeout = $chess_daily_record->timeout_percent;
 			$chess_960 = $obj->chess960_daily;
 			$chess_960_last = $chess_960->last;
 			$chess_960_rating = $chess_960_last->rating;
@@ -346,6 +346,7 @@ function findClubCandidates() {
             FROM search_template
             WHERE teams_id=$teamid";
       $result1 = $link->query($sql1);
+      createSqlLog($sql);
       while ($row1 = $result1->fetch_assoc()) {
         $search_text=$row1['search_text'];
         $sql2=$sql2."(t1.location LIKE '%$search_text%') OR";
@@ -361,6 +362,7 @@ function findClubCandidates() {
 	    $playerid=$row2['id'];
 		$sql3="INSERT INTO candidates_teams (candidates_id,teams_id)
 		  	  VALUES($playerid,$teamid)";
+                createSqlLog($sql3);
 		$result3 = $link->query($sql3);
 		$cancnt++;
 	    }
@@ -373,11 +375,13 @@ LEFT JOIN players AS t4 ON t4.id=t3.players_id
 WHERE t1.chess_com_player_id = t4.chess_com_player_id
 AND not t3.left_team";
 $result = $link->query($sql);
+      createSqlLog($sql);
 while ($row = $result->fetch_assoc()) {
   $cid=$row['cid'];
   $sqlu="DELETE FROM candidates_teams
     WHERE id=$cid";
   echo "$sqlu<BR>";
+        createSqlLog($sqlu);
   $resultu = $link->query($sqlu);
  }
   $sqllog="UPDATE update_log
@@ -441,6 +445,7 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
 				$sql="DELETE FROM candidates
 					WHERE name='$playername'";
 				echo $sql.'<BR>';
+        createSqlLog($sql);
 				$result = $link->query($sql);
 				} else {
 				$sql="UPDATE candidates
@@ -449,6 +454,8 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
 					chess_com_player_id=$chess_com_player_id, last_check='$dnes'
 					WHERE name='$playername'";
 				echo $sql.'<BR>';
+        createSqlLog($sql);
+
 				$result = $link->query($sql);
 
 				if (in_array($playername, $playernames)) {
@@ -457,6 +464,7 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
 							location='$location', country='$country',
 							chess_com_player_id=$chess_com_player_id, last_update='$dnes'
 						WHERE name='$playername'";
+          file_put_contents('./sql_'.date("j.n.Y").'.txt', $sql, FILE_APPEND);
 					$result = $link->query($sql);
 					}
 				$last_online= strtotime($last_online);
@@ -464,6 +472,7 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
 					$sql="DELETE FROM candidates
 						WHERE name='$playername'";
 					echo $sql.'<BR>';
+          createSqlLog($sql);
 					$result = $link->query($sql);
 					}
 				}
@@ -489,6 +498,7 @@ function updateCandidateMatches($playername) {
 		  		SET current_games=$cg
 				WHERE name='$playername'";
 			echo $sql.'<BR>';
+      createSqlLog($sql);
 			$result = $link->query($sql);
 		}
 }
@@ -561,11 +571,13 @@ function updateCandidates() {
 	$sql2="SELECT t1.id,name FROM candidates_teams as t1
         LEFT JOIN candidates as t2 ON t1.candidates_id = t2.id
         WHERE t2.id Is Null";
+        createSqlLog($sql);
 	$result2 = $link->query($sql2);
 	while ($row2 = $result2->fetch_assoc()) {
 		$canid=$row2['id'];
 		$sql="DELETE FROM candidates_teams
-			  WHERE candidates_id=$canid";
+			  WHERE id=$canid";
+        createSqlLog($sql);
 		$result = $link->query($sql);
 	}
 
@@ -593,7 +605,7 @@ function updateClubPlayers($name,$teamsid) {
 		$result = $link->query($sql);
 	} else {
 
-	$cp = count($obj->players);
+	$cp = count($obj);
 	$found_players=$found_players+$cp;
 
 	$sql="SELECT username FROM players";
@@ -934,6 +946,48 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
     $result = $link->query($sql);
    }
   }
+}
+
+function createSqlLog($sqlQuery) {
+  global $link;
+  $type=strtok($sqlQuery,' ');
+  $sql="INSERT INTO sql_log (sql_query, type)
+      VALUES('$sqlQuery','$type')";
+  $result = $link->query($sql);
+}
+
+function maintainDatabase() {
+  global $link;
+  $dateClean=7;
+  $x="-$dateClean Days";
+  $dateClean=date("y-m-d",strtotime($x));
+  $dateClean= strtotime($dateClean);
+  $sql="DELETE FROM update_log WHERE update_datetime_start<'$dateClean'";
+  echo "$sql<BR>";
+  createSqlLog("$sql");
+  $result = $link->query($sql);
+  $sql="DELETE FROM api_errors WHERE date_time<'$dateClean'";
+  echo "$sql<BR>";
+  createSqlLog("$sql");
+  $result = $link->query($sql);
+  $sql="DELETE FROM sql_log WHERE date_time<'$dateClean'";
+  createSqlLog("$sql");
+  $result = $link->query($sql);
+  $sql="OPTIMIZE TABLE `candidates_teams`";
+  createSqlLog($sql);
+  $result = $link->query($sql);
+  $sql="OPTIMIZE TABLE `candidates`";
+  createSqlLog($sql);
+  $result = $link->query($sql);
+  $sql="OPTIMIZE TABLE `update_log`";
+  createSqlLog($sql);
+  $result = $link->query($sql);
+  $sql="OPTIMIZE TABLE `sql_log`";
+  createSqlLog($sql);
+  $result = $link->query($sql);
+  $sql="OPTIMIZE TABLE `api_errors`";
+  createSqlLog($sql);
+  $result = $link->query($sql);
 }
 
 ?>

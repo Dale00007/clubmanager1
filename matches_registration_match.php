@@ -18,12 +18,12 @@ function notempty($var) {
     return ($var==="0"||$var);
 }
 
-if (empty($_GET['eloMax'])) {$eloMax=3000;} else {$eloMax=$_GET['eloMax'];}
-if (empty($_GET['eloMin'])) {$eloMin=0;} else {$eloMin=$_GET['eloMin'];}
-if (notempty($_GET['currentGamesMax'])) {$currentGamesMax=$_GET['currentGamesMax'];} else {$currentGamesMax=999;}
-if (notempty($_GET['timeoutMax'])) {$timeoutMax=$_GET['timeoutMax'];} else {$timeoutMax=100;}
-if (empty($_GET['currentGamesMin'])) {$currentGamesMin=0;} else {$currentGamesMin=$_GET['currentGamesMin'];}
-if (empty($_GET['lastLogin'])) {$lastLoginP=""; $lastLoginDay="";
+if (!isset($_GET['eloMax'])) {$eloMax=3000;} else {$eloMax=$_GET['eloMax'];}
+if (!isset($_GET['eloMin'])) {$eloMin=0;} else {$eloMin=$_GET['eloMin'];}
+if (!isset($_GET['currentGamesMax'])) {$currentGamesMax=999;} else {$currentGamesMax=$_GET['currentGamesMax'];}
+if (isset($_GET['timeoutMax'])) {$timeoutMax=$_GET['timeoutMax'];} else {$timeoutMax=100;}
+if (!isset($_GET['currentGamesMin'])) {$currentGamesMin=0;} else {$currentGamesMin=$_GET['currentGamesMin'];}
+if (!isset($_GET['lastLogin'])) {$lastLoginP=""; $lastLoginDay="";
   } else {
   $lastLoginP=$_GET['lastLogin'];
   $x="-$lastLoginP Days";
@@ -302,7 +302,7 @@ while ($row = $result->fetch_assoc()) {
       <TD align='center'>$pp960</TD>
       <TD align='center'>$ppSlow</TD>
       <TD>$ppComment</TD>
-      <TD align='center'><A HREF='players_player_detail.php' class='tablea'>ENTER</A></TD>
+      <TD align='center'><A HREF='players_player_detail.php?pName=$pName' class='tablea' target='_blank'>ENTER</A></TD>
       </TR>";
       $availableCandidates[$i]=$pName;
       $i++;

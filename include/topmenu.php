@@ -21,7 +21,8 @@ if (strpos($_SERVER['PHP_SELF'],'administration') !== false) {
 		<A href='administration_teams.php' class='menu'>TEAMS</A> -
 		<A href='administration_candidates.php' class='menu'>CANDIDATES</A> -
 		<A href='administration_parsing.php' class='menu'>PARSING</A> -
-		<A href='administration_logs.php' class='menu'>LOGS</A> ";
+		<A href='administration_logs.php' class='menu'>LOGS</A> -
+		<A href='administration_sqllog.php' class='menu'>SQL</A> ";
 	}
 
 	if (strpos($_SERVER['PHP_SELF'],'teamadmin') !== false) {

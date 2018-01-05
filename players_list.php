@@ -46,6 +46,7 @@ include "include/navigation.php";
        <TH>P-960<SPAN class="tooltip">Player doesn't want to play Chess960</SPAN></TH>
        <TH>P-Slow<SPAN class="tooltip">Player plays only games with pace slower than 3 days</SPAN></TH>
        <TH>P-Comment<SPAN class="tooltip">Comment about the player</SPAN></TH>
+       <TH>Details<SPAN class="tooltip">Player page with details</SPAN></TH>
      </TR>
      </THEAD>
 <?php
@@ -109,6 +110,7 @@ while ($row = $result->fetch_assoc()) {
   <TD align='center'>$p960</TD>
   <TD align='center'>$pslow</TD>
   <TD align='center'>$pcomment</TD>
+  <TD align='center'><A HREF='players_player_detail.php?pName=$pName' class='tablea' target='_blank'>ENTER</A></TD>
   </TR>";
 }
 ?>
