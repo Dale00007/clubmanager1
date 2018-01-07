@@ -19,6 +19,9 @@ function notempty($var) {
 }
 
 if (!isset($_GET['eloMax'])) {$eloMax=3000;} else {$eloMax=$_GET['eloMax'];}
+if (isset($_GET['playerMaxGames'])) {$playerMaxGames="1";} else {$playerMaxGames="0";}
+if (isset($_GET['player960'])) {$player960="1";} else {$player960="0";}
+if (isset($_GET['playerSlow'])) {$playerSlow="1";} else {$playerSlow="0";}
 if (!isset($_GET['eloMin'])) {$eloMin=0;} else {$eloMin=$_GET['eloMin'];}
 if (!isset($_GET['currentGamesMax'])) {$currentGamesMax=999;} else {$currentGamesMax=$_GET['currentGamesMax'];}
 if (isset($_GET['timeoutMax'])) {$timeoutMax=$_GET['timeoutMax'];} else {$timeoutMax=100;}
@@ -229,9 +232,15 @@ echo "<INPUT type='hidden' name='matchid' value=$matchId>
   <TR><TD>Current games</TD>
       <TD align='center'><INPUT type='text' name='currentGamesMin' value='$currentGamesMin' size=4></TD>
       <TD align='center'><INPUT type='text' name='currentGamesMax' value='$currentGamesMax' size=4></TD></TR>
-  <TR><TD>Max games</TD><TD colspan=2>respect player level parameter</TD></TR>
-  <TR><TD>Chess960</TD><TD colspan=2>respect player level parameter</TD></TR>
-  <TR><TD>Only slow games</TD><TD colspan=2>respect player level parameter</TD></TR>
+  <TR><TD>Max games</TD><TD colspan=2>respect player level parameter <INPUT type='checkbox' name='playerMaxGames'";
+  if ($playerMaxGames=="1") {echo " checked";}
+  echo "></TD></TR>
+  <TR><TD>Chess960</TD><TD colspan=2>respect player level parameter <INPUT type='checkbox' name='player960'";
+  if ($player960=="1") {echo " checked";}
+  echo "></TD></TR>
+  <TR><TD>Only slow games</TD><TD colspan=2>respect player level parameter <INPUT type='checkbox' name='playerSlow'";
+  if ($playerSlow=="1") {echo " checked";}
+  echo "></TD></TR>
   ";
 ?>
   <THEAD>
@@ -240,12 +249,12 @@ echo "<INPUT type='hidden' name='matchid' value=$matchId>
 </TABLE>
 </FORM>
 <br clear='all' /><br />
-
 <div align="left" class="container">
 <TABLE align="left" class="sortable">
  <THEAD>
  <TR>
  <TH>Playername</TH>
+ <TH>Msg</TH>
  <TH>Rating</TH>
  <TH>Rat960</TH>
  <TH>TO<SPAN class="tooltip">Percentage of timeouts in last 3months based on Chess.com</SPAN></TH>
@@ -274,6 +283,10 @@ echo "<INPUT type='hidden' name='matchid' value=$matchId>
        AND current_games>=$currentGamesMin
        AND current_games<=$currentGamesMax ";
        if (!empty($lastLoginDay)) {$sql=$sql."AND last_login>'$lastLoginDay' ";}
+       if ($playerMaxGames=="1") {$sql=$sql."AND current_games<=parm_max_games ";}
+       if ($player960=="1") {$sql=$sql."AND not parm_960 ";}
+       if ($playerSlow=="1") {$sql=$sql."AND not parm_slow ";}
+
  $sql=$sql."ORDER BY $eloSort DESC";
  //echo "$sql<BR>";
  $result = $link->query($sql);
@@ -293,6 +306,7 @@ while ($row = $result->fetch_assoc()) {
    if(!in_array($pName,$registeredPlayers)) {
      echo "<TR>
       <TD><A HREF='https://www.chess.com/member/$pName' target='_blank' class='tablea'>$pName</A></TD>
+      <TD align='center'><A HREF='https://www.chess.com/messages/compose/$pName' target='_blank' class='tablea'>MSG</A></TD>
       <TD align='center'>$pRating</TD>
       <TD align='center'>$pRating960</TD>
       <TD align='center'>$pTimeout</TD>

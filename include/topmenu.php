@@ -32,6 +32,7 @@ if (strpos($_SERVER['PHP_SELF'],'administration') !== false) {
 
 	if (strpos($_SERVER['PHP_SELF'],'matches') !== false) {
 	echo "<A href='matches_list.php' class='menu'>TEAM MATCHES</A> -
-		<A href='matches_registration.php' class='menu'>REGISTRATION</A> - ";
+		<A href='matches_registration.php' class='menu'>REGISTRATION</A> -
+		<A href='matches_completed.php' class='menu'>COMPLETED</A> - ";
 	}
 ?>

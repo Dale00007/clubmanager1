@@ -110,7 +110,7 @@ while ($row = $result->fetch_assoc()) {
   <TD align='center'>$p960</TD>
   <TD align='center'>$pslow</TD>
   <TD align='center'>$pcomment</TD>
-  <TD align='center'><A HREF='players_player_detail.php?pName=$pName' class='tablea' target='_blank'>ENTER</A></TD>
+  <TD align='center'><A HREF='players_player_detail.php?pName=$username' class='tablea' target='_blank'>ENTER</A></TD>
   </TR>";
 }
 ?>

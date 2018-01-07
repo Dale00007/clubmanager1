@@ -40,6 +40,7 @@ function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 	$last_online = date('Y-m-d',($obj->last_online));
 	$member_from = date('Y-m-d',($obj->joined));
 	$location = $obj->location;
+  $location = str_replace("'", "", $location);
 	$chess_com_player_id = $obj->player_id;
 	$country1 = $obj->country;
 	$status = $obj->status;
@@ -330,15 +331,15 @@ function findClubCandidates() {
     $sti=$row['search_type_id'];
     if ($sti==1) {
       $sql2="SELECT t1.id,name FROM candidates as t1
-        LEFT JOIN players as t2 ON t1.name = t2.username
-        LEFT JOIN candidates_teams as t3 on t1.id = t3.candidates_id
+        LEFT JOIN (SELECT username,players_id as id FROM players, players_teams WHERE teams_id=$teamid) as t2 ON t1.name = t2.username
+        LEFT JOIN (SELECT candidates_id as id FROM candidates_teams WHERE teams_id=$teamid) as t3 on t1.id = t3.id
         WHERE t2.id Is Null
         AND t3.id Is Null
         AND t1.country='$ctry'";
     } else {
       $sql2="SELECT t1.id,name FROM candidates as t1
-        LEFT JOIN players as t2 ON t1.name = t2.username
-        LEFT JOIN candidates_teams as t3 on t1.id = t3.candidates_id
+        LEFT JOIN (SELECT username,players_id as id FROM players, players_teams WHERE teams_id=$teamid) as t2 ON t1.name = t2.username
+        LEFT JOIN (SELECT candidates_id as id FROM candidates_teams WHERE teams_id=$teamid) as t3 on t1.id = t3.id
         WHERE t2.id Is Null
         AND t3.id Is Null
         AND (";
@@ -418,6 +419,7 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
 	$last_online = date('Y-m-d',($obj->last_online));
 	$member_from = date('Y-m-d',($obj->joined));
 	$location = $obj->location;
+  $location = str_replace("'", "", $location);
 	$chess_com_player_id = $obj->player_id;
 	$country1 = $obj->country;
 	$status = $obj->status;
