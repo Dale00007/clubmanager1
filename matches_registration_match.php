@@ -140,7 +140,7 @@ if ($htpperror<>200) {
 	foreach($oa as $row){
      $playerName = $row->username;
      if (empty($row->rating)){$playerRating=""; } else {$playerRating = $row->rating;}
-     $playerTimeout = $row->timeout;
+     $playerTimeout = $row->timeout_percent;
      if ($playerRating<>""){
      $teamPlayers1[$i]=array("playername" => $playerName,"rating" => $playerRating, "timeout" => $playerTimeout);
      $i++;
@@ -151,7 +151,7 @@ if ($htpperror<>200) {
   foreach($oa as $row){
      $playerName = $row->username;
      if (empty($row->rating)){$playerRating=""; } else {$playerRating = $row->rating;}
-     $playerTimeout = $row->timeout;
+     $playerTimeout = $row->timeout_percent;
      if ($playerRating<>""){
      $teamPlayers2[$i]=array("playername" => $playerName,"rating" => $playerRating, "timeout" => $playerTimeout);
      $i++;

@@ -39,7 +39,7 @@ findClubMatches($team_link,$team_id,$findType);
    <TH>Opponent</TH>
    <TH>Boards</TH>
    <TH>Score</TH>
-   <TH width=80>Competition</TH>
+   <TH width=120>Competition</TH>
 
    <TH>Details<SPAN class="tooltip">Displays page with detailed match information for recruitment</SPAN></TH>
  </TR>

@@ -5,8 +5,6 @@ $ctx = stream_context_create($cctx);
 $headers = array(
     'From: pez@atlas.cz'
 );
-
-
 // List of functions
 // updatePlayer(playername) - Update single player
 // updatePlayerMatches(playername) - Update single player - Current matches
@@ -25,8 +23,6 @@ $headers = array(
 // findClubsMatches() - Find new club matches for all teams.
 // searchWords(string, array) - Finds if any of strings in array is included in the string
 // updateMatchReg (matchId,teamId,teamLink) - Update details of match in registration status
-
-
 // Update single player profile
 function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 	global $link;
@@ -40,7 +36,6 @@ function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 	$last_online = date('Y-m-d',($obj->last_online));
 	$member_from = date('Y-m-d',($obj->joined));
 	$location = $obj->location;
-  $location = str_replace("'", "", $location);
 	$chess_com_player_id = $obj->player_id;
 	$country1 = $obj->country;
 	$status = $obj->status;
@@ -114,9 +109,7 @@ function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 				}
 	   }
 }
-
 //update single player matches
-
 function updatePlayerMatches($playername) {
 	global $link;
 	$url="https://api.chess.com/pub/player/$playername/games";
@@ -139,7 +132,6 @@ function updatePlayerMatches($playername) {
 			$result = $link->query($sql);
 		}
 }
-
 function updatePlayerStats($playername) {
 	global $link;
 	$url="https://api.chess.com/pub/player/$playername/stats";
@@ -180,7 +172,6 @@ function updatePlayerStats($playername) {
 			$result = $link->query($sql);
 		}
 }
-
 function updateTeamPlayers($type, $team, $inactivity, $typeg) {
 	global $link;
 	$p_inactivity_m=3;
@@ -188,7 +179,6 @@ function updateTeamPlayers($type, $team, $inactivity, $typeg) {
 	$inactivityday=date("y-m-d",strtotime($x));
 	$inactivityday= strtotime($inactivityday);
     $dnes=date("Y-m-d");
-
 	if ($type == "all") {
 	$sql="SELECT username, players.id AS pid
 		  FROM players, players_teams
@@ -206,7 +196,6 @@ function updateTeamPlayers($type, $team, $inactivity, $typeg) {
 	$sqllog="INSERT INTO update_log (update_type_id)
 			VALUES (4)";
 	}
-
 	switch ($inactivity) {
     case "active":
         $sql = $sql." AND players_status_id=1";
@@ -219,13 +208,11 @@ function updateTeamPlayers($type, $team, $inactivity, $typeg) {
 			VALUES (3)";
         break;
 	}
-
  $sql = $sql." GROUP BY username LIMIT 200";
 	echo $sql.'<BR>'.$sqllog.'<BR>';
 	$result = $link->query($sqllog);
 	$last_id = $link->insert_id;
  	//echo "Inserted id: $last_id";
-
 	$result = $link->query($sql);
 	$num_rows = mysqli_num_rows($result);
     while ($row = $result->fetch_assoc()) {
@@ -247,13 +234,11 @@ function updateTeamPlayers($type, $team, $inactivity, $typeg) {
         		break;
 			}
 		}
-
 	$sqllog="UPDATE update_log
 			 SET update_datetime_end=CURRENT_TIMESTAMP, num_players=$num_rows
 			 WHERE id=$last_id";
 	$result = $link->query($sqllog);
 }
-
 function getJson($url) {
 	global $headers;
 	$ch = curl_init();
@@ -266,20 +251,17 @@ function getJson($url) {
 	curl_close($ch);
 	return array($result,$httpcode);
 }
-
 function findActivePlayers($ctry) {
     global $link;
 	$sqllog="INSERT INTO update_log (update_type_id)
 			VALUES (7)";
 	$result = $link->query($sqllog);
 	$last_id = $link->insert_id;
-
 	$sql="SELECT name FROM candidates";
     $result = $link->query($sql);
     $playernames1 = $result->fetch_all(MYSQLI_ASSOC);
 	$playernames = array_column($playernames1, 'name');
 	//print_r($playernames);
-
 	$url="https://api.chess.com/pub/country/$ctry/players";
 	//echo "$url<BR>";
  	$json1=getJson($url);
@@ -313,7 +295,6 @@ function findActivePlayers($ctry) {
 	echo $sqllog;
 	$result = $link->query($sqllog);
 }
-
 function findClubCandidates() {
   global $link;
   $cancnt=0;
@@ -331,15 +312,15 @@ function findClubCandidates() {
     $sti=$row['search_type_id'];
     if ($sti==1) {
       $sql2="SELECT t1.id,name FROM candidates as t1
-        LEFT JOIN (SELECT username,players_id as id FROM players, players_teams WHERE teams_id=$teamid) as t2 ON t1.name = t2.username
-        LEFT JOIN (SELECT candidates_id as id FROM candidates_teams WHERE teams_id=$teamid) as t3 on t1.id = t3.id
+        LEFT JOIN players as t2 ON t1.name = t2.username
+        LEFT JOIN candidates_teams as t3 on t1.id = t3.candidates_id
         WHERE t2.id Is Null
         AND t3.id Is Null
         AND t1.country='$ctry'";
     } else {
       $sql2="SELECT t1.id,name FROM candidates as t1
-        LEFT JOIN (SELECT username,players_id as id FROM players, players_teams WHERE teams_id=$teamid) as t2 ON t1.name = t2.username
-        LEFT JOIN (SELECT candidates_id as id FROM candidates_teams WHERE teams_id=$teamid) as t3 on t1.id = t3.id
+        LEFT JOIN players as t2 ON t1.name = t2.username
+        LEFT JOIN candidates_teams as t3 on t1.id = t3.candidates_id
         WHERE t2.id Is Null
         AND t3.id Is Null
         AND (";
@@ -356,9 +337,7 @@ function findClubCandidates() {
         $sql2=$sql2.")";
       }
     echo $teamname." - ".$sql2."<HR>";
-
 	$result2 = $link->query($sql2);
-
 	while ($row2 = $result2->fetch_assoc()) {
 	    $playerid=$row2['id'];
 		$sql3="INSERT INTO candidates_teams (candidates_id,teams_id)
@@ -390,7 +369,6 @@ while ($row = $result->fetch_assoc()) {
 		WHERE id=$last_id";
   $result = $link->query($sqllog);
 }
-
 function findActivePlayersAll() {
   global $link;
   $sql="SELECT code
@@ -401,7 +379,6 @@ function findActivePlayersAll() {
 	  findActivePlayers($ctry);
 	 }
 	}
-
 // Update single candidate profile
 function updateCandidateProfile($playername, $pid, $inactivityday) {
 	global $link;
@@ -409,7 +386,6 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
     $result = $link->query($sql);
     $playernames1 = $result->fetch_all(MYSQLI_ASSOC);
     $playernames = array_column($playernames1, 'name');
-
 	$url="https://api.chess.com/pub/player/$playername";
 	$url = strtolower($url);
  	$json1=getJson($url);
@@ -419,12 +395,10 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
 	$last_online = date('Y-m-d',($obj->last_online));
 	$member_from = date('Y-m-d',($obj->joined));
 	$location = $obj->location;
-  $location = str_replace("'", "", $location);
 	$chess_com_player_id = $obj->player_id;
 	$country1 = $obj->country;
 	$status = $obj->status;
 	$country = substr($country1,34,2);
-
 	$dnes=date("Y-m-d");
 	if ($htpperror<>200) {
 		if ($htpperror==404) {
@@ -457,9 +431,7 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
 					WHERE name='$playername'";
 				echo $sql.'<BR>';
         createSqlLog($sql);
-
 				$result = $link->query($sql);
-
 				if (in_array($playername, $playernames)) {
 					$sql="UPDATE players
 		  				SET last_login='$last_online', member_from='$member_from',
@@ -480,7 +452,6 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
 				}
 	}
 }
-
 function updateCandidateMatches($playername) {
 	global $link;
 	$url="https://api.chess.com/pub/player/$playername/games";
@@ -504,7 +475,6 @@ function updateCandidateMatches($playername) {
 			$result = $link->query($sql);
 		}
 }
-
 function updateCandidateStats($playername) {
 	global $link;
 	$url="https://api.chess.com/pub/player/$playername/stats";
@@ -543,7 +513,6 @@ function updateCandidateStats($playername) {
 			$result = $link->query($sql);
 		}
 }
-
 function updateCandidates() {
 	global $link;
 	$p_inactivity_m=1;
@@ -569,7 +538,6 @@ function updateCandidates() {
     updateCandidateMatches($name);
 		updateCandidateStats($name);
 		}
-
 	$sql2="SELECT t1.id,name FROM candidates_teams as t1
         LEFT JOIN candidates as t2 ON t1.candidates_id = t2.id
         WHERE t2.id Is Null";
@@ -582,51 +550,52 @@ function updateCandidates() {
         createSqlLog($sql);
 		$result = $link->query($sql);
 	}
-
 	$sqllog="UPDATE update_log
 			 SET update_datetime_end=CURRENT_TIMESTAMP, num_players=$num_rows
 			 WHERE id=$last_id";
 	$result = $link->query($sqllog);
 }
-
 function updateClubPlayers($name,$teamsid) {
 	global $found_players;
     global $link;
-
 	$url="https://api.chess.com/pub/club/$name/members";
 	$url = strtolower($url);
  	$json1=getJson($url);
  	$json=$json1[0];
 	$htpperror=$json1[1];
 	$obj = json_decode($json);
-
 	if ($htpperror<>200) {
 		  $sql="INSERT INTO api_errors (url,error)
 		  VALUES('$url',$htpperror)";
 		//echo $sql.'<BR>';
 		$result = $link->query($sql);
 	} else {
+  $players_weekly = $obj->weekly;
+  $players_monthly = $obj->monthly;
+  $players_alltime = $obj->all_time;
+  $obj= (object) array_merge((array) $players_weekly, (array) $players_monthly);
+  $obj= (object) array_merge((array) $obj, (array) $players_alltime);
 
 	$cp = count($obj);
 	$found_players=$found_players+$cp;
-
 	$sql="SELECT username FROM players";
     $result = $link->query($sql);
     $existingPlayers1 = $result->fetch_all(MYSQLI_ASSOC);
     $existingPlayers = array_column($existingPlayers1, 'username');
-
 	$sql="SELECT username
 		FROM players,players_teams
 		WHERE players_teams.players_id=players.id AND teams_id=$teamsid";
     $result = $link->query($sql);
     $clubPlayers1 = $result->fetch_all(MYSQLI_ASSOC);
     $clubPlayers = array_column($clubPlayers1, 'username');
+	$oa1=(array) $obj;
+//  echo "<HR>"; print_r($oa1);
+  $oa=array_column($oa1,username);
+//  echo "<HR>"; print_r($oa); echo "<HR>";
 
-	$oa=(array) $obj;
-	$fplayers=[];
-	foreach($oa as $row => $value){
-		foreach($value as $row2 => $playername) {
-        	echo $playername . " - ";
+  $fplayers=[];
+	foreach($oa as $playername){
+    	echo $playername . " - ";
 			array_push($fplayers,$playername);
 			if (in_array($playername, array_map('strtolower', $clubPlayers)))
   			{
@@ -666,7 +635,6 @@ function updateClubPlayers($name,$teamsid) {
   				}
   			}
 			echo "<br/>";
-		}
 	}
 	print_r($fplayers);
 	echo "<BR>";
@@ -695,7 +663,6 @@ function updateClubPlayers($name,$teamsid) {
 	echo "<HR>";
 	}
 }
-
 function updateClubsPlayers() {
 	global $link;
 	$sql="SELECT teamlink,id
@@ -718,12 +685,10 @@ function updateClubsPlayers() {
 			 WHERE id=$last_id";
 	$result = $link->query($sqllog);
 }
-
 function findClubMatches($name,$teamsid,$findType) {
   global $found_matches;
   global $link;
   global $foundWord;
-
 	$url="https://api.chess.com/pub/club/$name/matches";
 	$url = strtolower($url);
  	$json1=getJson($url);
@@ -736,7 +701,6 @@ function findClubMatches($name,$teamsid,$findType) {
 		//echo $sql.'<BR>';
 		$result = $link->query($sql);
 	} else {
-
 	$finished = $obj->finished;
   $inprogress = $obj->in_progress;
   $registered = $obj->registered;
@@ -744,24 +708,20 @@ function findClubMatches($name,$teamsid,$findType) {
   $im = count($inprogress);
   $rm = count($registered);
 //  echo "$name - finished: $fm - inprogress: $im - registeration: $rm<BR>";
-
   $sql="SELECT matchid FROM matches WHERE teams_id=$teamsid";
     $result = $link->query($sql);
     $existingClubGames1 = $result->fetch_all(MYSQLI_ASSOC);
     $existingClubGames = array_column($existingClubGames1, 'matchid');
     //print_r($existingClubGames); echo "<BR>";
-
   $sql="SELECT abbr,id FROM gametype_seasons";
       $result = $link->query($sql);
       $gameSeasons1 = $result->fetch_all(MYSQLI_ASSOC);
       $gameSeasons = array_column($gameSeasons1, 'abbr', 'id');
-
   if ($findType=="registered") {
     $gameStatus = array ("registered");
   } else {
     $gameStatus = array ("registered", "in_progress", "finished");
   }
-
   foreach ($gameStatus as $gs) {
    $gameList = $obj->$gs;
    $gl = count($gameList);
@@ -773,7 +733,6 @@ function findClubMatches($name,$teamsid,$findType) {
      $matchId = substr($matchLink,32,strlen($matchLink)-31);
      $matchOpponentLink = $row1['opponent'];
      $matchOpponent = substr($matchOpponentLink,31,strlen($matchOpponentLink)-31);
-
 //     echo "$matchId - $matchName - $matchLink - $matchOpponent - $matchOpponentLink";
      //echo "MatchID under process: $matchId<BR>";
      if (in_array($matchId, $existingClubGames))
@@ -800,7 +759,6 @@ function findClubMatches($name,$teamsid,$findType) {
            $competition=array_search("Friendly",$gameSeasons);
          }
          $matchName = str_replace("'", "", $matchName);
-
          $sql="INSERT INTO matches (matchid,teams_id,opponent_link,status,competition,matchname)
              VALUES($matchId,$teamsid,'$matchOpponent',$matchStatus,$competition,'$matchName')";
          $result = $link->query($sql);
@@ -812,7 +770,6 @@ function findClubMatches($name,$teamsid,$findType) {
   return($found_matches);
   }
 }
-
 function findClubsMatches() {
 	global $link;
   global $found_matches;
@@ -835,7 +792,6 @@ function findClubsMatches() {
 			 WHERE id=$last_id";
 	$result = $link->query($sqllog);
 }
-
 function searchWords($string,$words) {
     foreach($words as $word)
     {
@@ -846,7 +802,6 @@ function searchWords($string,$words) {
     }
     return false;
 }
-
 function updateMatchReg($matchid,$teamid,$teamlink) {
   global $link;
   $url="https://api.chess.com/pub/match/$matchid";
@@ -872,7 +827,6 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
   $team2 = $teams->team2;
   $team2LinkLong = $team2->{'@id'};
   $team2Link = substr($team2LinkLong,31,strlen($team2LinkLong)-31);
-
   if ($status=="in_progress") {
     $sql="UPDATE matches
       SET status=1
@@ -880,23 +834,19 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
        AND teams_id=$teamid";
     $result = $link->query($sql);
     } else {
-
     //get players count
     $players1 = $team1->players;
     $players2 = $team2->players;
     $plcnt1=count($players1);
     $plcnt2=count($players2);
-
     //get match info
     if ($time_class=="daily") {$timeClass="D";} else {$timeClass="L";}
     if ($rules=="chess") {$rules="S";} else {$rules="9";}
-
   //get rating average
   for ($i=0;$i<$plcnt1;$i++) {
     if (empty($players1[$i]->rating)){$plrat1[$i]=""; $plcnt1=$plcnt1-1;} else {$plrat1[$i]=$players1[$i]->rating;}
     // echo $plrat1[$i].",";
   }
-
   for ($i=0;$i<$plcnt2;$i++) {
     if (empty($players2[$i]->rating)){$plrat1[$i]=""; $plcnt2=$plcnt2-1;} else {$plrat2[$i]=$players2[$i]->rating;}
     // echo $plrat2[$i].",";
@@ -910,7 +860,6 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
     if($plrat1[$i]>$plrat2[$i]) {$basEst1++;$basEst1++;}
     if($plrat1[$i]<$plrat2[$i]) {$basEst2++;$basEst2++;}
     if($plrat1[$i]==$plrat2[$i]) {$basEst1++;$basEst2++;}
-
     $dif=$plrat1[$i]-$plrat2[$i];
     if ($dif>=150) { 	$bf50++;$bf50++;}
     if ($dif>=50 and $dif<150) { 	$bf50=$bf50+1.5;$ba50=$ba50+0.5;}
@@ -921,7 +870,6 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
   }
   $avg1=round($sumRat1/$currentBoards);
   $avg2=round($sumRat2/$currentBoards);
-
   if ($team1Link==$teamlink) {
     $homeaway="home";
     $plh=$plcnt1; $pla=$plcnt2;
@@ -935,7 +883,6 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
     $beh=$basEst2; $bea=$basEst1;
     $aeh=$ba50; $aea=$bf50;
   }
-
     $sql="UPDATE matches
       SET players=$plh,players_o=$pla,
           avgrat=$avh, avgrat_o=$ava,
@@ -949,7 +896,6 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
    }
   }
 }
-
 function createSqlLog($sqlQuery) {
   global $link;
   $type=strtok($sqlQuery,' ');
@@ -957,7 +903,6 @@ function createSqlLog($sqlQuery) {
       VALUES('$sqlQuery','$type')";
   $result = $link->query($sql);
 }
-
 function maintainDatabase() {
   global $link;
   $dateClean=7;
@@ -991,5 +936,4 @@ function maintainDatabase() {
   createSqlLog($sql);
   $result = $link->query($sql);
 }
-
 ?>
