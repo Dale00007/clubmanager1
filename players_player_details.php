@@ -89,7 +89,7 @@ echo "<TABLE align='left'>
 
 <br clear='all' /><br />
 <h3>Parameters</h3>
-<form action='players_player_detail.php' method='get'>
+<form action='players_player_details.php' method='get'>
 <INPUT type='hidden' name='pName' value='$pName'>
 <INPUT type='hidden' name='ptid' value='$ptid'>
 <TABLE align='left'>
@@ -107,10 +107,13 @@ echo "<TABLE align='left'>
  ?>
 
 <br clear='all' /><br />
-<h3>List of timeouts</h3>
+<h3>List of club timeouts</h3>
 
 <br clear='all' /><br />
-<h3>List of games</h3>
+<h3>List of club games</h3>
+
+<br clear='all' /><br />
+<h3>Overall Timeout Stat</h3>
 
 <?php
 

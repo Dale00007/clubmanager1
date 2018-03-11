@@ -23,6 +23,8 @@ $headers = array(
 // findClubsMatches() - Find new club matches for all teams.
 // searchWords(string, array) - Finds if any of strings in array is included in the string
 // updateMatchReg (matchId,teamId,teamLink) - Update details of match in registration status
+// updateMatch (matchId,teamId,teamLink) - Update details of ongoing or completed match
+
 // Update single player profile
 function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 	global $link;
@@ -802,6 +804,7 @@ function searchWords($string,$words) {
     }
     return false;
 }
+
 function updateMatchReg($matchid,$teamid,$teamlink) {
   global $link;
   $url="https://api.chess.com/pub/match/$matchid";
@@ -818,14 +821,20 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
 	} else {
 //  echo "<HR>".$url."<BR>";
   $status = $obj->status;
-  $rules = $obj->rules;
-  $time_class = $obj->time_class;
+  $started = date('Y-m-d',($obj->start_time));
+  $matchSettings = $obj->settings;
+  $rules = $matchSettings->rules;
+  $time_class = $matchSettings->time_class;
+  $minTeamPlayers = $matchSettings->min_team_players;
+  $timeControl = $matchSettings->time_control;
   $teams = $obj->teams;
   $team1 = $teams->team1;
   $team1LinkLong = $team1->{'@id'};
   $team1Link = substr($team1LinkLong,31,strlen($team1LinkLong)-31);
+  $team1Name = $team1->name;
   $team2 = $teams->team2;
   $team2LinkLong = $team2->{'@id'};
+  $team2Name = $team2->name;
   $team2Link = substr($team2LinkLong,31,strlen($team2LinkLong)-31);
   if ($status=="in_progress") {
     $sql="UPDATE matches
@@ -842,6 +851,7 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
     //get match info
     if ($time_class=="daily") {$timeClass="D";} else {$timeClass="L";}
     if ($rules=="chess") {$rules="S";} else {$rules="9";}
+    if ($timeControl=="1/259200") {$timeControl=3;} else {$timeControl=0;}
   //get rating average
   for ($i=0;$i<$plcnt1;$i++) {
     if (empty($players1[$i]->rating)){$plrat1[$i]=""; $plcnt1=$plcnt1-1;} else {$plrat1[$i]=$players1[$i]->rating;}
@@ -876,19 +886,23 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
     $avh=$avg1; $ava=$avg2;
     $beh=$basEst1; $bea=$basEst2;
     $aeh=$bf50; $aea=$ba50;
+    $opponentName=$team2Name;
   } else {
     $homeaway="away";
     $plh=$plcnt2; $pla=$plcnt1;
     $avh=$avg2; $ava=$avg1;
     $beh=$basEst2; $bea=$basEst1;
     $aeh=$ba50; $aea=$bf50;
+    $opponentName=$team1Name;
   }
     $sql="UPDATE matches
       SET players=$plh,players_o=$pla,
           avgrat=$avh, avgrat_o=$ava,
           basest=$beh, basest_o=$bea,
           advest=$aeh, advest_o=$aea,
-          rules='$rules', time_class='$timeClass'
+          rules='$rules', time_class='$timeClass', started='$started',
+          min_team_players=$minTeamPlayers, time_control_day=$timeControl,
+          opponent_name='$opponentName'
       WHERE matchid=$matchid
        AND teams_id=$teamid";
        //echo "$sql<BR>";
@@ -896,6 +910,7 @@ function updateMatchReg($matchid,$teamid,$teamlink) {
    }
   }
 }
+
 function createSqlLog($sqlQuery) {
   global $link;
   $type=strtok($sqlQuery,' ');
@@ -903,6 +918,7 @@ function createSqlLog($sqlQuery) {
       VALUES('$sqlQuery','$type')";
   $result = $link->query($sql);
 }
+
 function maintainDatabase() {
   global $link;
   $dateClean=7;
@@ -936,4 +952,96 @@ function maintainDatabase() {
   createSqlLog($sql);
   $result = $link->query($sql);
 }
+
+function updateMatch($matchid,$teamid,$teamlink) {
+  global $link;
+  $url="https://api.chess.com/pub/match/$matchid";
+	$url = strtolower($url);
+ 	$json1=getJson($url);
+ 	$json=$json1[0];
+	$htpperror=$json1[1];
+	$obj = json_decode($json);
+	if ($htpperror<>200) {
+		  $sql="INSERT INTO api_errors (url,error)
+		  VALUES('$url',$htpperror)";
+		//echo $sql.'<BR>';
+		$result = $link->query($sql);
+	} else {
+//  echo "<HR>".$url."<BR>";
+  $status = $obj->status;
+  $boards = $obj->boards;
+  $started = date('Y-m-d',($obj->start_time));
+  $ended = date('Y-m-d',($obj->end_time));
+  $matchSettings = $obj->settings;
+  $rules = $matchSettings->rules;
+  $time_class = $matchSettings->time_class;
+  $minTeamPlayers = $matchSettings->min_team_players;
+  $timeControl = $matchSettings->time_control;
+
+  $teams = $obj->teams;
+  $team1 = $teams->team1;
+  $team1LinkLong = $team1->{'@id'};
+  $team1Link = substr($team1LinkLong,31,strlen($team1LinkLong)-31);
+  $team1Name = $team1->name;
+  $team1Score = $team1->score;
+  $team1Result = $team1->result;
+
+  $team2 = $teams->team2;
+  $team2LinkLong = $team2->{'@id'};
+  $team2Name = $team2->name;
+  $team2Link = substr($team2LinkLong,31,strlen($team2LinkLong)-31);
+  $team2Score = $team2->score;
+  $team2Result = $team2->result;
+  if ($time_class=="daily") {$timeClass="D";} else {$timeClass="L";}
+  if ($rules=="chess") {$rules="S";} else {$rules="9";}
+  if ($timeControl=="1/259200") {$timeControl=3;} else {$timeControl=0;}
+
+  if ($team1Link==$teamlink) {
+    $homeaway="home";
+    $opponentName=$team2Name;
+    $result=$team1Result;
+    $score=$team1Score;
+    $scoreOpp=$team2Score;
+  } else {
+    $homeaway="away";
+    $result=$team2Result;
+    $score=$team2Score;
+    $scoreOpp=$team2Score;
+    $opponentName=$team1Name;
+  }
+    $sql="UPDATE matches
+      SET boards=$boards, score=$score, score_opp=$scoreOpp, result='$result',
+          rules='$rules', time_class='$timeClass', started='$started', finished='$ended',
+          min_team_players=$minTeamPlayers, time_control_day=$timeControl,
+          opponent_name='$opponentName'
+      WHERE matchid=$matchid
+       AND teams_id=$teamid";
+       echo "$sql<HR>";
+    $result = $link->query($sql);
+   }
+  }
+
+function updateAllMatches() {
+  	global $link;
+  	$sql="SELECT matchid,teams_id,teamlink
+  		  FROM matches, teams
+  		  WHERE matches.teams_id=teams.id AND status<>3";
+  	$sqllog="INSERT INTO update_log (update_type_id)
+  			VALUES (12)";
+  	$result = $link->query($sqllog);
+  	$last_id = $link->insert_id;
+   	//echo "Inserted id: $last_id";
+  	$resultx = $link->query($sql);
+  	$num_rows = mysqli_num_rows($resultx);
+      while ($rowx = $resultx->fetch_assoc()) {
+  		$matchid=$rowx['matchid'];
+      $teamsid=$rowx['teams_id'];
+      $teamLink=$rowx['teamlink'];
+  		updateMatch($matchid, $teamsid, $teamLink);
+  		}
+      $sqllog="UPDATE update_log
+    			 SET update_datetime_end=CURRENT_TIMESTAMP
+    			 WHERE id=$last_id";
+    	$result = $link->query($sqllog);
+    }
 ?>

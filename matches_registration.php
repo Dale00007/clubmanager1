@@ -34,9 +34,10 @@ findClubMatches($team_link,$team_id,$findType);
 <TABLE align="left" class="sortable">
  <THEAD>
  <TR>
-   <TH>MatchID</TH>
-   <TH>Match Name</TH>
+   <TH width=80>MatchID</TH>
+   <TH width=300>Match Name</TH>
    <TH>Opponent</TH>
+   <TH>Start</TH>
    <TH>Players<SPAN class="tooltip">Number of registered players</SPAN></TH>
    <TH>Average<SPAN class="tooltip">Average rating of players</SPAN></TH>
    <TH>BasEst<SPAN class="tooltip">Estimated result based on direct comparison of ratings on boards</SPAN></TH>
@@ -50,7 +51,7 @@ findClubMatches($team_link,$team_id,$findType);
      FROM matches
      WHERE status=0
        AND teams_id=$team_id
-     ORDER BY matchid";
+     ORDER BY started ASC";
  $result = $link->query($sql);
  while ($row = $result->fetch_assoc()) {
      $matchId=$row['matchid'];
@@ -61,12 +62,13 @@ findClubMatches($team_link,$team_id,$findType);
  		FROM matches
  		WHERE status=0
  			AND teams_id=$team_id
- 		ORDER BY matchid";
+ 		ORDER BY started ASC";
  $result = $link->query($sql);
  while ($row = $result->fetch_assoc()) {
   $matchId=$row['matchid'];
   $matchName=$row['matchname'];
   $opponentLink=$row['opponent_link'];
+  $opponentName=$row['opponent_name'];
   $players=$row['players'];
   $playersOpp=$row['players_o'];
   $avgRat=$row['avgrat'];
@@ -75,12 +77,20 @@ findClubMatches($team_link,$team_id,$findType);
   $basEstOpp=$row['basest_o'];
   $advEst=$row['advest'];
   $advEstOpp=$row['advest_o'];
+  $started=$row['started'];
+  $minTeamPlayers=$row['min_team_players'];
+  if ($players>=$minTeamPlayers) {$minPlayersCheck="white";} else {$minPlayersCheck="red";}
+  if ($playersOpp>=$minTeamPlayers) {$minPlayersCheckOpp="white";} else {$minPlayersCheckOpp="red";}
+  $today=date('Y-m-d');
+  $started2 = date('Y-m-d',strtotime($started));
+  $days2start = (strtotime($started2) - strtotime($today))/60/60/24;
 
   echo "<TR>
    <TD align='center'><A href='https://www.chess.com/club/matches/$matchId' target='_blank' class='tablea'>$matchId</TD>
    <TD align='left'>$matchName</TD>
-   <TD align='left'>$opponentLink</TD>
-   <TD align='center'>$players : $playersOpp</TD>
+   <TD align='left'><A href='https://www.chess.com/club/$opponentLink' target='_blank' class='tablea'>$opponentName</A></TD>
+   <TD align='center'>$started<BR>$days2start days</TD>
+   <TD align='center'><font color='$minPlayersCheck'>$players</fong> : <font color='$minPlayersCheckOpp'>$playersOpp</font></TD>
    <TD align='center'>$avgRat : $avgRatOpp</TD>
    <TD align='center'>$basEst : $basEstOpp</TD>
    <TD align='center'>$advEst : $advEstOpp</TD>

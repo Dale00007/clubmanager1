@@ -59,6 +59,7 @@ $result = $link->query($sql);
  $row = $result->fetch_assoc();
  $matchName=$row['matchname'];
  $opponentLink=$row['opponent_link'];
+ $opponentName=$row['opponent_name'];
  $players=$row['players'];
  $playersOpp=$row['players_o'];
  $avgRat=$row['avgrat'];
@@ -69,6 +70,10 @@ $result = $link->query($sql);
  $advEstOpp=$row['advest_o'];
  $rules=$row['rules'];
  $timeClass=$row['time_class'];
+ $timeControl=$row['time_control_day'];
+ $started=$row['started'];
+ $minTeamPlayers=$row['min_team_players'];
+
  if ($timeClass=="D") {$timeClass="Daily";} else {$timeClass="Live";}
  if ($rules=="S") {$rules="Standard"; $eloSort="elo_s";} else {$rules="Chess960"; $eloSort="elo_960";}
 
@@ -78,9 +83,12 @@ echo "<div align='left' class='container'>
  <TR><TH>Match ID</TH><TD><A HREF='https://www.chess.com/club/matches/$matchId/games' target='_blank' class='tablea'>$matchId</A></TD></TR>
  <TR><TH>Match API</TH><TD><A HREF='https://api.chess.com/pub/match/$matchId' target='_blank' class='tablea'>https://api.chess.com/pub/match/$matchId</A></TD></TR>
  <TR><TH>Match Name</TH><TD>$matchName</TD></TR>
- <TR><TH>Opponent</TH><TD>$opponentLink</TD></TR>
+ <TR><TH>Opponent</TH><TD><A href='https://www.chess.com/club/$opponentLink' target='_blank' class='tablea'>$opponentName</A></TD></TR>
+ <TR><TH>Start date</TH><TD>$started</TD></TR>
  <TR><TH>Rules</TH><TD>$rules</TD></TR>
  <TR><TH>Time class</TH><TD>$timeClass</TD></TR>
+ <TR><TH>Time control</TH><TD>$timeControl</TD></TR>
+ <TR><TH>Min players</TH><TD>$minTeamPlayers</TD></TR>
  <TR><TH>Players</TH><TD align='center'>$players : $playersOpp</TD></TR>
  <TR><TH>Average</TH><TD align='center'>$avgRat : $avgRatOpp</TD></TR>
  <TR><TH>Basic Estimate</TH><TD align='center'>$basEst : $basEstOpp</TD></TR>
@@ -101,6 +109,7 @@ echo "<div align='left' class='container'>
  <TH>Timeout<SPAN class="tooltip">Percentage of timeouts in last 3months based on Chess.com</SPAN></TH>
  <TH>Last login<SPAN class="tooltip">Last login to CHess.com</SPAN></TH>
  <TH>CG<SPAN class="tooltip">Number of online games player is having now</SPAN></TH>
+ <TH>Details</TH>
  </TR>
  </THEAD>
 
@@ -200,6 +209,7 @@ if ($htpperror<>200) {
     <TD align='center'>$pTimeout</TD>
     <TD align='center'>$lastLogin</TH>
     <TD align='center'>$currentGames</TH>
+    <TD align='center'><A HREF='players_player_details.php?pName=$pName' class='tablea' target='_blank'>ENTER</A></TD>
     </TR>";
   }
 }
@@ -316,7 +326,7 @@ while ($row = $result->fetch_assoc()) {
       <TD align='center'>$pp960</TD>
       <TD align='center'>$ppSlow</TD>
       <TD>$ppComment</TD>
-      <TD align='center'><A HREF='players_player_detail.php?pName=$pName' class='tablea' target='_blank'>ENTER</A></TD>
+      <TD align='center'><A HREF='players_player_details.php?pName=$pName' class='tablea' target='_blank'>ENTER</A></TD>
       </TR>";
       $availableCandidates[$i]=$pName;
       $i++;

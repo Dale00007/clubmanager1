@@ -57,15 +57,16 @@ findClubMatches($team_link,$team_id,$findType);
   $matchId=$row['matchid'];
   $matchName=$row['matchname'];
   $opponentLink=$row['opponent_link'];
+  $opponentName=$row['opponent_name'];
   $boards=$row['boards'];
   $score=$row['score'];
   $opponentScore=$row['score_opp'];
   $competition=$row['abbr'];
 
   echo "<TR>
-   <TD align='center'><A href='https://www.chess.com/club/matches/$matchId' target='_blank' class='tablea'>$matchId</TD>
-   <TD align='left'>$matchName</TD>
-   <TD align='left'>$opponentLink</TD>
+   <TD align='center' width=80><A href='https://www.chess.com/club/matches/$matchId' target='_blank' class='tablea'>$matchId</TD>
+   <TD align='left' width=200>$matchName</TD>
+   <TD align='left' width=200><A href='https://www.chess.com/club/$opponentLink' target='_blank' class='tablea'>$opponentName</A></TD>
    <TD align='center'>$boards</TD>
    <TD align='center'>$score:$opponentScore</TD>
    <TD align='center'>$competition</TD>
