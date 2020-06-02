@@ -149,10 +149,10 @@ function updatePlayerStats($playername) {
 		} else {
 			$obj = json_decode($json);
 			$chess_daily = $obj->chess_daily;
-      $chess_daily_last = $chess_daily->last;
-      $chess_daily_record = $chess_daily->record;
-      $chess_daily_rating = $chess_daily_last->rating;
-      $chess_daily_timeout = $chess_daily_record->timeout_percent;
+			$chess_daily_last = $chess_daily->last;
+			$chess_daily_record = $chess_daily->record;
+			$chess_daily_rating = $chess_daily_last->rating;
+			$chess_daily_timeout = $chess_daily_record->timeout_percent;
 			$chess_960 = $obj->chess960_daily;
 			$chess_960_last = $chess_960->last;
 			$chess_960_rating = $chess_960_last->rating;
@@ -162,13 +162,38 @@ function updatePlayerStats($playername) {
 			$chess_rapid = $obj->chess_rapid;
 			$chess_rapid_last = $chess_rapid->last;
 			$chess_rapid_rating = $chess_rapid_last->rating;
+			$chess_bullet = $obj->chess_bullet;
+			$chess_bullet_last = $chess_bullet->last;
+			$chess_bullet_rating = $chess_bullet_last->rating;
+			$tactics = $obj->tactics;
+			$tactics_highest = $tactics->highest;
+			$tactics_rating = $tactics_highest->rating;
+			$lessons = $obj->lessons;
+			$lessons_highest = $lessons->highest;
+			$lessons_rating = $lessons_highest->rating;
+			$lessons = $obj->lessons;
+			$lessons_highest = $lessons->highest;
+			$lessons_rating = $lessons_highest->rating;
+			$puzzle_rush = $obj->puzzle_rush;
+			$puzzle_best = $puzzle_rush->best;
+			$puzzle_attempts = $puzzle_best->total_attempts;
+			$puzzle_score = $puzzle_best->score;
 			if ($chess_daily_rating=='') {$chess_daily_rating=0;}
 			if ($chess_rapid_rating=='') {$chess_rapid_rating=0;}
 			if ($chess_960_rating=='') {$chess_960_rating=0;}
 			if ($chess_blitz_rating=='') {$chess_blitz_rating=0;}
+			if ($chess_bullet_rating=='') {$chess_bullet_rating=0;}
+			if ($tactics_rating=='') {$tactics_rating=0;}
+			if ($lessons_rating=='') {$lessons_rating=0;}
+			if ($puzzle_attempts=='') {$puzzle_attempts=0;}
+			if ($puzzle_score=='') {$puzzle_score=0;}			
 			$sql="UPDATE players
 				SET elo_s=$chess_daily_rating, elo_960=$chess_960_rating,
-				elo_rapid=$chess_rapid_rating, elo_blitz=$chess_blitz_rating, to_ratio_site=$chess_daily_timeout
+				elo_rapid=$chess_rapid_rating, elo_blitz=$chess_blitz_rating, 
+				elo_bullet=$chess_bullet_rating, elo_t=$tactics_rating,
+				elo_lessons=$lessons_rating, elo_lessons=$lessons_rating,
+				elo_rush_score=$puzzle_score, elo_rush_attempts=$puzzle_attempts,
+				to_ratio_site=$daily_timeout
 				WHERE username='$playername'";
 			echo $sql.'<HR>';
 			$result = $link->query($sql);
@@ -210,7 +235,7 @@ function updateTeamPlayers($type, $team, $inactivity, $typeg) {
 			VALUES (3)";
         break;
 	}
- $sql = $sql." GROUP BY username LIMIT 200";
+ $sql = $sql." GROUP BY username LIMIT 250";
 	echo $sql.'<BR>'.$sqllog.'<BR>';
 	$result = $link->query($sqllog);
 	$last_id = $link->insert_id;
