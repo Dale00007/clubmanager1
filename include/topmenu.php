@@ -4,6 +4,7 @@ if ($_SERVER['PHP_SELF']=="/index.php") {
 
 if (strpos($_SERVER['PHP_SELF'],'players') !== false) {
 	echo "<A href='players_list.php' class='menu'>LIST</A> -
+	    <A href='players_rating.php' class='menu'>RATING</A> -
 		<A href='players_new.php' class='menu'>NEW</A> -
 		<A href='players_activation.php' class='menu'>ACTIVATION</A> -
 		<A href='players_inactive.php' class='menu'>CLOSED/INACTIVE</A> -

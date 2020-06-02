@@ -193,7 +193,7 @@ function updatePlayerStats($playername) {
 				elo_bullet=$chess_bullet_rating, elo_t=$tactics_rating,
 				elo_lessons=$lessons_rating, elo_lessons=$lessons_rating,
 				elo_rush_score=$puzzle_score, elo_rush_attempts=$puzzle_attempts,
-				to_ratio_site=$daily_timeout
+				to_ratio_site=$chess_daily_timeout
 				WHERE username='$playername'";
 			echo $sql.'<HR>';
 			$result = $link->query($sql);
