@@ -93,6 +93,8 @@ echo "<div align='left' class='container'>
  <TR><TH>Average</TH><TD align='center'>$avgRat : $avgRatOpp</TD></TR>
  <TR><TH>Basic Estimate</TH><TD align='center'>$basEst : $basEstOpp</TD></TR>
  <TR><TH>Advanced Estimate</TH><TD align='center'>$advEst : $advEstOpp</TD></TR>
+ <TR><TH colspan='2'><A HREF='matches_registration.php?deleteMatchId=$matchId' class='tablea'>DELETE MATCH</A></TH></TR>
+
  </TABLE></P>
  <br clear='all' /><br />";
 ?>

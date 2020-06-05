@@ -20,6 +20,7 @@ echo "<body>";
 include "include/navigation.php";
 include "include/functions.php";
 $team_id=$_SESSION['team_id'];
+$deleteMatchId = isset($_GET['deleteMatchId']) ? $_GET['deleteMatchId'] : '';
 $sql = "SELECT teamlink FROM teams WHERE id=$team_id";
 $result = $link->query($sql);
 $row = $result->fetch_assoc();
@@ -27,6 +28,10 @@ $team_link=$row['teamlink'];
 $findType="registered";
 findClubMatches($team_link,$team_id,$findType);
 
+if ($deleteMatchId<>'') {
+	$sqldelete="DELETE from matches WHERE matchid=$deleteMatchId";
+	$resdelete=$link->query($sqldelete);
+	}
 ?>
 
 <h2>List of matches in registration</h2>
