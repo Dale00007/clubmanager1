@@ -36,8 +36,11 @@ function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 	echo $playername.'<BR>'.$url.' - httperror: '.$htpperror.'<BR>';
 	$obj = json_decode($json);
 	$last_online = date('Y-m-d',($obj->last_online));
-	$member_from = date('Y-m-d',($obj->joined));
+	$member_from = date('Y-m-d',($obj->joined));	
+	if(isset($obj->location)){
 	$location = $obj->location;
+	$location = str_replace("'"," ",$location)
+	} else {$location='';}
 	$chess_com_player_id = $obj->player_id;
 	$country1 = $obj->country;
 	$status = $obj->status;
@@ -52,21 +55,26 @@ function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 	     	$pid=strtolower($row['pid']);
 		     $sql="SELECT username as newname FROM players
 		         WHERE username<>'$playername'
-		         AND chess_com_player_id=$pid";
-		     $result = $link->query($sql);
+		         AND chess_com_player_id=$pid";	
+			 $result = $link->query($sql);
 		     $row = $result->fetch_assoc();
 	     	$newname=strtolower($row['newname']);
 		     if ($newname<>'') {
-					     $sql="DELETE FROM players
-		         WHERE username='$playername'";
-		          $result = $link->query($sql);
-		         $sql="UPDATE players
-		  		     SET username='$newname'
-					     WHERE chess_com_player_id=$pid";
-			    }
-		    echo $sql.'<BR>';
+					$sql="DELETE FROM players
+					WHERE username='$playername'";
+					$result = $link->query($sql);
+					$sql="UPDATE players
+		  		    SET username='$newname'
+					WHERE chess_com_player_id=$pid";
+					echo $sql."<BR>";
+					$url = $url." - player renamed";
+			    } else {
+					$sql="DELETE FROM players
+					WHERE username='$playername'";
+					echo $sql."<BR>";
+					$url = $url." - player disappeared";					
+				}	
 		$result = $link->query($sql);
-		$url = $url." - player renamed";
 		$sql="INSERT INTO api_errors (url,error)
 		  VALUES('$url',$htpperror)";
 		  echo $sql.'<BR>';
@@ -83,7 +91,7 @@ function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 					location='$location', country='$country',
 					chess_com_player_id=$chess_com_player_id, last_update='$dnes'
 					WHERE username='$playername'";
-			//echo $sql.'<BR>';
+			echo $sql.'<BR>';
 			$result = $link->query($sql);
 			$last_online= strtotime($last_online);
 			if (strpos($status, "closed") !== false) {
@@ -148,45 +156,53 @@ function updatePlayerStats($playername) {
 		$result = $link->query($sql);
 		} else {
 			$obj = json_decode($json);
-			$chess_daily = $obj->chess_daily;
-			$chess_daily_last = $chess_daily->last;
-			$chess_daily_record = $chess_daily->record;
-			$chess_daily_rating = $chess_daily_last->rating;
-			$chess_daily_timeout = $chess_daily_record->timeout_percent;
-			$chess_960 = $obj->chess960_daily;
-			$chess_960_last = $chess_960->last;
-			$chess_960_rating = $chess_960_last->rating;
-			$chess_blitz = $obj->chess_blitz;
-			$chess_blitz_last = $chess_blitz->last;
-			$chess_blitz_rating = $chess_blitz_last->rating;
-			$chess_rapid = $obj->chess_rapid;
-			$chess_rapid_last = $chess_rapid->last;
-			$chess_rapid_rating = $chess_rapid_last->rating;
-			$chess_bullet = $obj->chess_bullet;
-			$chess_bullet_last = $chess_bullet->last;
-			$chess_bullet_rating = $chess_bullet_last->rating;
-			$tactics = $obj->tactics;
-			$tactics_highest = $tactics->highest;
-			$tactics_rating = $tactics_highest->rating;
+
+			if(isset($obj->chess_daily)){
+			$chess_daily_rating = $obj->chess_daily->last->rating;
+			$chess_daily_timeout =$obj->chess_daily->record->timeout_percent;		
+			} else {
+			$chess_daily_rating=0;
+			$chess_daily_timeout=0;			
+			}
+			if(isset($obj->chess960_daily)){		
+			$chess_960_rating = $obj->chess960_daily->last->rating;
+			} else {
+			$chess_960_rating=0;		
+			}
+			if(isset($obj->chess_blitz)){
+			$chess_blitz_rating = $obj->chess_blitz->last->rating;
+			} else {
+			$chess_blitz_rating=0;		
+			}		
+			if(isset($obj->chess_rapid)){			
+			$chess_rapid_rating = $obj->chess_rapid->last->rating;
+			} else {
+			$chess_rapid_rating=0;		
+			}				
+			if(isset($obj->chess_bullet)){			
+			$chess_bullet_rating = $obj->chess_bullet->last->rating;
+			} else {
+			$chess_bullet_rating=0;		
+			}				
+			if(isset($obj->tactics->highest)){				
+			$tactics_rating = $obj->tactics->highest->rating;
+			} else {
+			$tactics_rating=0;		
+			}				
+			if(isset($obj->lessons->highest)){			
 			$lessons = $obj->lessons;
-			$lessons_highest = $lessons->highest;
-			$lessons_rating = $lessons_highest->rating;
-			$lessons = $obj->lessons;
-			$lessons_highest = $lessons->highest;
-			$lessons_rating = $lessons_highest->rating;
-			$puzzle_rush = $obj->puzzle_rush;
-			$puzzle_best = $puzzle_rush->best;
-			$puzzle_attempts = $puzzle_best->total_attempts;
-			$puzzle_score = $puzzle_best->score;
-			if ($chess_daily_rating=='') {$chess_daily_rating=0;}
-			if ($chess_rapid_rating=='') {$chess_rapid_rating=0;}
-			if ($chess_960_rating=='') {$chess_960_rating=0;}
-			if ($chess_blitz_rating=='') {$chess_blitz_rating=0;}
-			if ($chess_bullet_rating=='') {$chess_bullet_rating=0;}
-			if ($tactics_rating=='') {$tactics_rating=0;}
-			if ($lessons_rating=='') {$lessons_rating=0;}
-			if ($puzzle_attempts=='') {$puzzle_attempts=0;}
-			if ($puzzle_score=='') {$puzzle_score=0;}			
+			$lessons_rating = $obj->lessons->highest->rating;
+			} else {
+			$lessons_rating=0;		
+			}	
+			if(isset($obj->puzzle_rush->best)){
+			$puzzle_attempts = $obj->puzzle_rush->best->total_attempts;
+			$puzzle_score = $obj->puzzle_rush->best->score;
+			} else {
+			$puzzle_score=0;
+			$puzzle_attempts=0;	
+			}				
+					
 			$sql="UPDATE players
 				SET elo_s=$chess_daily_rating, elo_960=$chess_960_rating,
 				elo_rapid=$chess_rapid_rating, elo_blitz=$chess_blitz_rating, 
