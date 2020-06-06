@@ -335,10 +335,17 @@ while ($row = $result->fetch_assoc()) {
       }
     }
     echo "</TABLE><br clear='all' /><br /><HR>";
-    foreach ($availableCandidates as $key => $value) {
-      echo "$value<br>";
-      }
+	echo "<p><div id='div2'>";
+		foreach ($availableCandidates as $key => $value) {
+        echo "$value<br>";
+        }
+	echo "</div></p>";
  ?>
+ 
+<p style="align:center">
+  <button class="btn-yellow" id="button2" onclick="CopyToClipboard('div2')" data-toggle="tooltip" title="Copy">COPY INVITE TEXT TO CLIPBOARD</button>
+</p>
+
 
 <?php
 include "include/navigationend.php";

@@ -119,12 +119,17 @@ switch ($invite_type) {
 
 
 $result = $link->query($sql);
+$player_list="";
 while ($row = $result->fetch_assoc()) {
  $username=$row['name'];
- echo "$username, ";
+ $player_list=$player_list."$username, ";
  }
 ?>
-
+<p><div id="div1" ><?php echo $player_list;?></div></p>
+<p style="align:center">
+  <button class="btn-yellow" id="button1" onclick="CopyToClipboard('div1')" data-toggle="tooltip" title="Copy">COPY PLAYERS TO CLIPBOARD</button>
+</p>
+ 
 <HR>
 <H4>Text for the invite</H4>
 
@@ -134,8 +139,12 @@ $sql="SELECT p_invitetext FROM teams WHERE id=$tid";
 $result = $link->query($sql);
 $row = $result->fetch_assoc();
 $teamtext=$row['p_invitetext'];
-echo $teamtext;
 ?>
+<p><div id="div2" ><?php echo $teamtext;?></div></p>
+<p style="align:center">
+  <button class="btn-yellow" id="button2" onclick="CopyToClipboard('div2')" data-toggle="tooltip" title="Copy">COPY INVITE TEXT TO CLIPBOARD</button>
+</p>
+
 <HR>
 
 <?php

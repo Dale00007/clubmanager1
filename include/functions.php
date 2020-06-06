@@ -39,7 +39,7 @@ function updatePlayerProfile($playername, $pid, $inactivityday, $typeg) {
 	$member_from = date('Y-m-d',($obj->joined));	
 	if(isset($obj->location)){
 	$location = $obj->location;
-	$location = str_replace("'"," ",$location)
+	$location = str_replace("'"," ",$location);
 	} else {$location='';}
 	$chess_com_player_id = $obj->player_id;
 	$country1 = $obj->country;
@@ -437,7 +437,10 @@ function updateCandidateProfile($playername, $pid, $inactivityday) {
 	$obj = json_decode($json);
 	$last_online = date('Y-m-d',($obj->last_online));
 	$member_from = date('Y-m-d',($obj->joined));
+	if(isset($obj->location)){
 	$location = $obj->location;
+	$location = str_replace("'"," ",$location);
+	} else {$location='';}
 	$chess_com_player_id = $obj->player_id;
 	$country1 = $obj->country;
 	$status = $obj->status;
@@ -532,22 +535,28 @@ function updateCandidateStats($playername) {
 			$result = $link->query($sql);
 		} else {
 			$obj = json_decode($json);
-			$chess_daily = $obj->chess_daily;
-			$chess_daily_last = $chess_daily->last;
-			$chess_daily_rating = $chess_daily_last->rating;
-			$chess_960 = $obj->chess960_daily;
-			$chess_960_last = $chess_960->last;
-			$chess_960_rating = $chess_960_last->rating;
-			$chess_blitz = $obj->chess_blitz;
-			$chess_blitz_last = $chess_blitz->last;
-			$chess_blitz_rating = $chess_blitz_last->rating;
-			$chess_rapid = $obj->chess_rapid;
-			$chess_rapid_last = $chess_rapid->last;
-			$chess_rapid_rating = $chess_rapid_last->rating;
-			if ($chess_daily_rating=='') {$chess_daily_rating=0;}
-			if ($chess_rapid_rating=='') {$chess_rapid_rating=0;}
-			if ($chess_960_rating=='') {$chess_960_rating=0;}
-			if ($chess_blitz_rating=='') {$chess_blitz_rating=0;}
+			if(isset($obj->chess_daily)){
+			$chess_daily_rating = $obj->chess_daily->last->rating;
+			$chess_daily_timeout =$obj->chess_daily->record->timeout_percent;		
+			} else {
+			$chess_daily_rating=0;
+			$chess_daily_timeout=0;			
+			}
+			if(isset($obj->chess960_daily)){		
+			$chess_960_rating = $obj->chess960_daily->last->rating;
+			} else {
+			$chess_960_rating=0;		
+			}
+			if(isset($obj->chess_blitz)){
+			$chess_blitz_rating = $obj->chess_blitz->last->rating;
+			} else {
+			$chess_blitz_rating=0;		
+			}		
+			if(isset($obj->chess_rapid)){			
+			$chess_rapid_rating = $obj->chess_rapid->last->rating;
+			} else {
+			$chess_rapid_rating=0;		
+			}	
 			$sql="UPDATE candidates
 				SET elo_s=$chess_daily_rating, elo_960=$chess_960_rating,
 				elo_rapid=$chess_rapid_rating, elo_blitz=$chess_blitz_rating

@@ -19,7 +19,6 @@ table {
   border: 1px black;
   background:black;
   margin:5px auto;
-  align: left;
 }
 
 thead th {
@@ -91,6 +90,11 @@ h2 {
   text-align:left;
 }
 
+button {
+  background-color:yellow;
+}
+
+
 table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after { 
     content: " \25B4\25BE" 
 }
@@ -111,3 +115,4 @@ table.sortable tbody tr::before {
 
 th span.tooltip {display:none;}
 th:hover span.tooltip {position:absolute;top:150px;left:400px;display:inline;border:2px solid green;}
+
